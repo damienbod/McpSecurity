@@ -59,6 +59,16 @@ https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
 https://blog.cloudflare.com/building-ai-agents-with-mcp-authn-authz-and-durable-objects/
 
+https://blog.aidanjohn.org/2025/07/30/mcp-a-new-frontier-in.html
+
+https://medium.com/kagenti-the-agentic-platform/security-in-and-around-mcp-part-1-oauth-in-mcp-3f15fed0dd6e
+
+https://medium.com/kagenti-the-agentic-platform/security-in-and-around-mcp-part-2-mcp-in-deployment-65bdd0ba9dc6
+
+https://blog.christianposta.com/implementing-mcp-dynamic-client-registration-with-spiffe/
+
+https://blog.christianposta.com/authenticating-mcp-oauth-clients-with-spiffe/
+
 ## Copilot Links
 
 https://github.com/dotnet/AspNetCore.Docs/issues/35798
@@ -66,3 +76,5 @@ https://github.com/dotnet/AspNetCore.Docs/issues/35798
 https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository-custom-instructions-for-github-copilot
 
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
+
+
