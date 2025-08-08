@@ -8,6 +8,10 @@ Research MCP, OAuth, security
 
 ## Ready made MCP
 
+https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
+
+https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
+
 ## Links
 
 https://github.com/MicrosoftDocs/mcp
@@ -15,6 +19,8 @@ https://github.com/MicrosoftDocs/mcp
 https://devblogs.microsoft.com/dotnet/mcp-csharp-sdk-2025-06-18-update/
 
 https://modelcontextprotocol.io/specification/draft/basic/authorization
+
+https://modelcontextprotocol.io/docs/learn/architecture
 
 https://github.com/SonarSource/sonarqube-mcp-server
 
