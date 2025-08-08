@@ -32,6 +32,8 @@ https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
 
 https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
+https://blog.cloudflare.com/building-ai-agents-with-mcp-authn-authz-and-durable-objects/
+
 ## Copilot Links
 
 https://github.com/dotnet/AspNetCore.Docs/issues/35798
