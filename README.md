@@ -12,13 +12,17 @@ https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
 
 https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
 
+## Standards, draft Standards
+
+https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization
+
+https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
+
 ## Links
 
 https://github.com/MicrosoftDocs/mcp
 
 https://devblogs.microsoft.com/dotnet/mcp-csharp-sdk-2025-06-18-update/
-
-https://modelcontextprotocol.io/specification/draft/basic/authorization
 
 https://modelcontextprotocol.io/docs/learn/architecture
 
