@@ -11,11 +11,19 @@ Research MCP, OAuth, security, authorization
 
 ## MCP flow types
 
+### Simple
+
 ![Flow 1](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-1.drawio.png)
+
+### On Behalf Of
 
 ![Flow 2](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-2.drawio.png)
 
+### Multi Client
+
 ![Flow 3](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-3.drawio.png)
+
+### Multi Client, Multi Server
 
 ![Flow 4](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-4.drawio.png)
 
