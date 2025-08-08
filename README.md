@@ -35,9 +35,15 @@ https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
 
 https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
 
+https://stytch.com/blog/MCP-authentication-and-authorization-guide/
+
 ## .NET MCP server
 
 https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
+
+https://github.com/microsoft/mcp-dotnet-samples
+
+https://learn.microsoft.com/en-us/dotnet/ai/quickstarts/build-mcp-server
 
 ## Standards, draft Standards
 
