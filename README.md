@@ -1,6 +1,13 @@
-# McpSecurity
+# MCP Security
 
-Research MCP, OAuth, security
+Research MCP, OAuth, security, authorization
+
+## Definitions
+
+- MCP Host: Any AI tool that requires data using an MCP
+- MCP Client: instance used for the AI tool
+- Local data src: local data
+- Remote Services: internat services
 
 ## MCP flow types
 
@@ -11,6 +18,10 @@ Research MCP, OAuth, security
 https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
 
 https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
+
+## .NET MCP server
+
+https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
 
 ## Standards, draft Standards
 
@@ -31,8 +42,6 @@ https://github.com/SonarSource/sonarqube-mcp-server
 https://den.dev/blog/mcp-authorization-resource/
 
 https://den.dev/blog/mcp-csharp-sdk-authorization/
-
-https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
 
 https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
