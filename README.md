@@ -11,6 +11,14 @@ Research MCP, OAuth, security, authorization
 
 ## MCP flow types
 
+![Flow 1](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-1.drawio.png)
+
+![Flow 2](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-2.drawio.png)
+
+![Flow 3](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-3.drawio.png)
+
+![Flow 4](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-4.drawio.png)
+
 ## SPIFFE
 
 ## Ready made MCP
