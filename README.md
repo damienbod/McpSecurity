@@ -25,6 +25,10 @@ https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
 
 ## Standards, draft Standards
 
+[OAuth 2.0 Dynamic Client Registration Protocol](https://datatracker.ietf.org/doc/html/rfc7591)
+
+[OAuth 2.0 Authorization Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414)
+
 https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization
 
 https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
