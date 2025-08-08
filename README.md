@@ -41,6 +41,8 @@ https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization
 
 https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
 
+https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
+
 ## Links
 
 https://github.com/MicrosoftDocs/mcp
