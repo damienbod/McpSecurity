@@ -29,6 +29,8 @@ Research MCP, OAuth, security, authorization
 
 ## SPIFFE
 
+https://spiffe.io/docs/latest/spiffe-about/overview/
+
 ## Ready made MCP
 
 https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
