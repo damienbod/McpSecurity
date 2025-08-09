@@ -15,6 +15,8 @@ Research MCP, OAuth, security, authorization
 - Agent(Tools, resources, prompts, discovery, uses MCPs, uses agents, uses LLMs)
 - RAG (Retrieval-Augmented Generation)
 - LLM (Large language model)
+- Generative AI (reactive based on existing model)
+- Agentic AI (Pro-active: action: perceive, decide, execute, learn)
 - AI Slop: name for  rubbish created by AI Tools
 - S in MCP: S stands for Security in the MCP abbreviation
 
