@@ -13,6 +13,7 @@ Research MCP, OAuth, security, authorization
 - A2A: agent to agent
 - Agent(Tools, resources, prompts, discovery, uses MCPs, uses agents, uses LLMs)
 - RAG (Retrieval-Augmented Generation)
+- LLM (Large languge model)
 
 ## MCP flow types
 
