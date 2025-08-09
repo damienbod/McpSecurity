@@ -17,6 +17,7 @@ Research MCP, OAuth, security, authorization
 - LLM (Large language model)
 - Generative AI (reactive based on existing model)
 - Agentic AI (Pro-active: action: perceive, decide, execute, learn)
+- Vector database
 - AI Slop: name for  rubbish created by AI Tools
 - S in MCP: S stands for Security in the MCP abbreviation
 
