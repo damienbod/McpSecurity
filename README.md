@@ -4,16 +4,17 @@ Research MCP, OAuth, security, authorization
 
 ## Definitions
 
-- MCP Host: Any AI tool that requires data using an MCP
-- MCP Client: instance used by an agent
+- MCP Client: used by an agent
+- MCP Server: implement of MCP standard for access to a resource
 - Local data src: local data
   - authn, authz, trust, data protection
 - Remote Services: internat services
   - authn, authz, trust, data protection
+- MCP Host: Any AI tool that requires data using an MCP
 - A2A: agent to agent
 - Agent(Tools, resources, prompts, discovery, uses MCPs, uses agents, uses LLMs)
 - RAG (Retrieval-Augmented Generation)
-- LLM (Large languge model)
+- LLM (Large language model)
 
 ## MCP flow types
 
