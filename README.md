@@ -5,21 +5,21 @@ Research MCP, OAuth, security, authorization
 ## Definitions
 
 - MCP Client: used by an agent
-- MCP Server: implement of MCP standard for access to a resource
+- MCP Server: implementation of MCP standard for access to a resource
 - Local data src: local data
   - authn, authz, trust, data protection
-- Remote Services: internat services
+- Remote Services: internet services
   - authn, authz, trust, data protection
 - MCP Host: Any AI tool that requires data using an MCP
 - A2A: agent to agent
-- Agent(Tools, resources, prompts, discovery, uses MCPs, uses agents, uses LLMs)
+- Agent (Tools, resources, prompts, discovery, uses MCPs, uses agents, uses LLMs)
 - RAG (Retrieval-Augmented Generation)
 - LLM (Large language model)
 - Generative AI (reactive based on existing model)
 - Agentic AI (Pro-active: action: perceive, decide, execute, learn)
 - Vector database
 - AI Slop: name for  rubbish created by AI Tools
-- S in MCP: S stands for Security in the MCP abbreviation
+- S in MCP: `S` stands for Security in the MCP abbreviation
 
 ## MCP flow types
 
@@ -106,5 +106,3 @@ https://github.com/dotnet/AspNetCore.Docs/issues/35798
 https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository-custom-instructions-for-github-copilot
 
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
-
-
