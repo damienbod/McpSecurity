@@ -99,6 +99,8 @@ https://blog.christianposta.com/implementing-mcp-dynamic-client-registration-wit
 
 https://blog.christianposta.com/authenticating-mcp-oauth-clients-with-spiffe/
 
+https://luke.geek.nz/azure/akahu-mcp-apim/
+
 ## Copilot Links
 
 https://github.com/dotnet/AspNetCore.Docs/issues/35798
