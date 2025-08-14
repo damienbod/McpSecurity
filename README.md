@@ -71,6 +71,8 @@ https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_pra
 
 https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
+https://den.dev/blog/mcp-authorization-resource/
+
 ## Links
 
 https://github.com/MicrosoftDocs/mcp
@@ -108,3 +110,11 @@ https://github.com/dotnet/AspNetCore.Docs/issues/35798
 https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository-custom-instructions-for-github-copilot
 
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
+
+## Ready to use servers
+https://mcpservers.org/
+
+https://devblogs.microsoft.com/azure-sdk/introducing-the-azure-mcp-server/
+ 
+## Learning Courses
+https://github.com/microsoft/mcp-for-beginners
