@@ -83,3 +83,7 @@ Refer to the VS Code or Visual Studio documentation for more information on conf
 
 - [Use MCP servers in VS Code (Preview)](https://code.visualstudio.com/docs/copilot/chat/mcp-servers)
 - [Use MCP servers in Visual Studio (Preview)](https://learn.microsoft.com/visualstudio/ide/mcp-servers)
+
+## Links
+
+https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
