@@ -4,6 +4,7 @@ Research MCP, OAuth, security, authorization
 
 ## Definitions
 
+- MCP: a standard integration layer for accessing tools
 - MCP Client: used by an agent
 - MCP Server: implementation of MCP standard for access to a resource
 - Local data src: local data
