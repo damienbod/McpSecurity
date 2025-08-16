@@ -4,6 +4,7 @@ Research MCP, OAuth, security, authorization
 
 ## Definitions
 
+- MCP: a standard integration layer for accessing tools
 - MCP Client: used by an agent
 - MCP Server: implementation of MCP standard for access to a resource
 - Local data src: local data
@@ -17,6 +18,7 @@ Research MCP, OAuth, security, authorization
 - LLM (Large language model)
 - Generative AI (reactive based on existing model)
 - Agentic AI (Pro-active: action: perceive, decide, execute, learn)
+- copilot UI over AI Agent
 - Vector database
 - AI Slop: name for  rubbish created by AI Tools
 - S in MCP: `S` stands for Security in the MCP abbreviation
