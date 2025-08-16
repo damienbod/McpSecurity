@@ -47,6 +47,8 @@ https://spiffe.io/docs/latest/spiffe-about/overview/
 
 ## Ready made MCP
 
+https://mcp.azure.com/
+
 https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
 
 https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
@@ -74,6 +76,18 @@ https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_pra
 https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
 https://den.dev/blog/mcp-authorization-resource/
+
+## AI UI agents with OAuth support
+
+https://github.com/daodao97/chatmcp
+
+https://claude.ai/download
+
+https://cursor.com/
+
+Visual Studio code
+
+Visual Studio
 
 ## Links
 
