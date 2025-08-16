@@ -87,3 +87,41 @@ Refer to the VS Code or Visual Studio documentation for more information on conf
 ## Links
 
 https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
+
+## Configure GitHub Copilot to use your MCP server 
+
+.vscode/mcp.json
+
+```json
+{
+  "servers": {
+    "SampleMcpServer": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "."
+      ],
+      "env": {
+        "WEATHER_CHOICES": "sunny,humid,freezing,perfect"
+      }
+    }
+  }
+}
+```
+
+## Configure Claude Desktop
+
+Add to your Claude Desktop configuration (%APPDATA%\Claude\claude_desktop_config.json on Windows):
+
+```json
+{
+  "mcpServers": {
+    "SampleMcpServer": {
+      "command": "dotnet",
+      "args": ["run", "--project", "C:\\path\\to\\MyMcpServer"]
+    }
+  }
+}
+```
