@@ -75,6 +75,18 @@ https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
 https://den.dev/blog/mcp-authorization-resource/
 
+## AI UI agents with OAuth support
+
+https://github.com/daodao97/chatmcp
+
+https://claude.ai/download
+
+https://cursor.com/
+
+Visual Studio code
+
+Visual Studio
+
 ## Links
 
 https://github.com/MicrosoftDocs/mcp
