@@ -49,6 +49,8 @@ https://spiffe.io/docs/latest/spiffe-about/overview/
 
 https://mcp.azure.com/
 
+https://github.com/microsoft/azure-devops-mcp
+
 https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
 
 https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
