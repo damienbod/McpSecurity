@@ -121,6 +121,8 @@ https://blog.christianposta.com/authenticating-mcp-oauth-clients-with-spiffe/
 
 https://luke.geek.nz/azure/akahu-mcp-apim/
 
+https://github.com/modelcontextprotocol/inspector
+
 ## Copilot Links
 
 https://github.com/dotnet/AspNetCore.Docs/issues/35798
@@ -130,9 +132,11 @@ https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
 
 ## Ready to use servers
+
 https://mcpservers.org/
 
 https://devblogs.microsoft.com/azure-sdk/introducing-the-azure-mcp-server/
  
 ## Learning Courses
+
 https://github.com/microsoft/mcp-for-beginners
