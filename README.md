@@ -4,6 +4,7 @@ Research MCP, OAuth, security, authorization
 
 ## Definitions
 
+- MCP: a standard integration layer for accessing tools
 - MCP Client: used by an agent
 - MCP Server: implementation of MCP standard for access to a resource
 - Local data src: local data
@@ -17,6 +18,7 @@ Research MCP, OAuth, security, authorization
 - LLM (Large language model)
 - Generative AI (reactive based on existing model)
 - Agentic AI (Pro-active: action: perceive, decide, execute, learn)
+- copilot UI over AI Agent
 - Vector database
 - AI Slop: name for  rubbish created by AI Tools
 - S in MCP: `S` stands for Security in the MCP abbreviation
@@ -45,6 +47,10 @@ https://spiffe.io/docs/latest/spiffe-about/overview/
 
 ## Ready made MCP
 
+https://mcp.azure.com/
+
+https://github.com/microsoft/azure-devops-mcp
+
 https://auth0.com/blog/an-introduction-to-mcp-and-authorization/
 
 https://learning.postman.com/docs/postman-ai-agent-builder/mcp-server-flows/mcp-server-flows/
@@ -70,6 +76,20 @@ https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization
 https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
 
 https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
+
+https://den.dev/blog/mcp-authorization-resource/
+
+## AI UI agents with OAuth support
+
+https://github.com/daodao97/chatmcp
+
+https://claude.ai/download
+
+https://cursor.com/
+
+Visual Studio code
+
+Visual Studio
 
 ## Links
 
@@ -101,6 +121,8 @@ https://blog.christianposta.com/authenticating-mcp-oauth-clients-with-spiffe/
 
 https://luke.geek.nz/azure/akahu-mcp-apim/
 
+https://github.com/modelcontextprotocol/inspector
+
 ## Copilot Links
 
 https://github.com/dotnet/AspNetCore.Docs/issues/35798
@@ -108,3 +130,13 @@ https://github.com/dotnet/AspNetCore.Docs/issues/35798
 https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository-custom-instructions-for-github-copilot
 
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
+
+## Ready to use servers
+
+https://mcpservers.org/
+
+https://devblogs.microsoft.com/azure-sdk/introducing-the-azure-mcp-server/
+ 
+## Learning Courses
+
+https://github.com/microsoft/mcp-for-beginners
