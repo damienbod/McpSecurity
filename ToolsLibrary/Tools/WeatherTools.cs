@@ -1,6 +1,7 @@
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 
+[McpServerToolType]
 public class WeatherTools
 {
     [McpServerTool]
