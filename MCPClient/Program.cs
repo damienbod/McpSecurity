@@ -6,8 +6,6 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ModelContextProtocol.Client;
 
-Console.WriteLine("Hello, World!");
-
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
@@ -29,8 +27,6 @@ using var sharedHandler = new SocketsHttpHandler
     PooledConnectionIdleTimeout = TimeSpan.FromMinutes(1)
 };
 using var httpClient = new HttpClient(sharedHandler);
-
-
 
 var serverUrl = "https://localhost:7133/mcp";
 var transport = new SseClientTransport(new()
