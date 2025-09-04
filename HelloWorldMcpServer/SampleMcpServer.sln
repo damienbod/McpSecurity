@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolsLibrary", "..\ToolsLib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpMcpServer", "..\HttpMcpServer\HttpMcpServer.csproj", "{FC243199-26D9-42CC-AB94-809A9570E273}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPClient", "..\MCPClient\MCPClient.csproj", "{F734AB09-82A2-4167-860E-78053312AD96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{FC243199-26D9-42CC-AB94-809A9570E273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC243199-26D9-42CC-AB94-809A9570E273}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC243199-26D9-42CC-AB94-809A9570E273}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F734AB09-82A2-4167-860E-78053312AD96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F734AB09-82A2-4167-860E-78053312AD96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F734AB09-82A2-4167-860E-78053312AD96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F734AB09-82A2-4167-860E-78053312AD96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
