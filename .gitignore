@@ -1,4 +1,5 @@
 /flows/.$**
-/HelloWorldMcpServer/.vs/**
-/HelloWorldMcpServer/bin/**
-/HelloWorldMcpServer/obj/**
+**/.vs/**
+**/.vscode/**
+**/bin/**
+**/obj/**
