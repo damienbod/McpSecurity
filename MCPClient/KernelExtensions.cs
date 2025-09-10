@@ -9,12 +9,14 @@ public static class KernelExtensions
     {
         // Retrieve the list of tools available on the MCP server
         var tools = await mcpClient.ListToolsAsync().ConfigureAwait(false);
+        Console.WriteLine($"Available MCP Tools:");
+
         foreach (var tool in tools)
         {
             Console.WriteLine($"{tool.Name}: {tool.Description}");
         }
 
         kernel.Plugins.AddFromFunctions("Tools", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
-
+        Console.WriteLine();
     }
 }

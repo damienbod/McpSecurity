@@ -1,3 +1,5 @@
+using ToolsLibrary.Tools;
+
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -5,6 +7,7 @@ builder.Services
        .AddMcpServer()
        .WithHttpTransport(o => o.Stateless = true)
        .WithTools<RandomNumberTools>()
+       .WithTools<DateTools>()
        .WithTools<WeatherTools>();
 
 builder.Services.AddHttpClient();

@@ -23,7 +23,14 @@ await kernel.ImportMcpClientFunctionsAsync(mcpClient);
 
 // Prepare execution
 var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: false);
-var chatHistory = SemanticKernelHelper.InitializeHistory("Please generate five random numbers?");
+//var prompt = "Please generate a random number";
+var prompt = "Please generate a random number with the ragne of -10 and 10";
+//var prompt = "Please generate a random number based from the current date";
+//var prompt = "Please generate five random numbers?";
+//var prompt = "Please generate two random numbers. Use these numbers to generate a thrid random number within the range of the first two.";
+
+var chatHistory = SemanticKernelHelper.InitializeHistory(prompt);
+Console.WriteLine($"User: {prompt}");
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
 // execute prompt
@@ -33,24 +40,23 @@ var messageContent = await chatCompletionService.GetChatMessageContentAsync(chat
 var functionCalls = FunctionCallContent.GetFunctionCalls(messageContent).ToArray();
 var functionCalled = false;
 
-
 // human-in-the-loop for function calling approval
 while (functionCalls.Length != 0)
 {
     // Adding function call from AI model to chat history
     chatHistory.Add(messageContent);
 
-
     // Iterating over the requested function calls and invoking them
     foreach (var functionCall in functionCalls)
     {
         // approve function call
-        Console.WriteLine($"Please allow/decline function execution with: {functionCall.FunctionName} with arguments: {functionCall.Arguments} [y,n]");
+        Console.WriteLine($"Please allow/decline function execution with: {functionCall.FunctionName} with arguments: {string.Join(';', functionCall.Arguments.Select(x => $"{x.Key}:{x.Value}"))} [y,n]");
         var key = Console.ReadKey();
+        Console.WriteLine();
 
         if (key.KeyChar != 'y' && key.KeyChar != 'Y')
         {
-            Console.WriteLine($"\nFunction call {functionCall.FunctionName} declined");
+            Console.WriteLine($"Function call {functionCall.FunctionName} declined");
             chatHistory.Add(new FunctionResultContent(functionCall.FunctionName, functionCall.PluginName, functionCall.Id).ToChatMessage());
             continue;
         }
@@ -58,14 +64,13 @@ while (functionCalls.Length != 0)
         functionCalled = true;
         var result = await functionCall.InvokeAsync(kernel);
         chatHistory.Add(result.ToChatMessage());
-        Console.WriteLine($"Function call : {result}");
+        Console.WriteLine($"Function call : {result.InnerContent}");
     }
 
     // Sending the functions invocation results to the AI model to get the final response
     if (functionCalled)
     {
         messageContent = await chatCompletionService.GetChatMessageContentAsync(chatHistory, executionSettings, kernel);
-        Console.WriteLine($"AI Agent: {messageContent.Content}");
         functionCalls = FunctionCallContent.GetFunctionCalls(messageContent).ToArray();
     }
     else
@@ -74,4 +79,4 @@ while (functionCalls.Length != 0)
     }
 }
 
-Console.WriteLine($"\nAI response: {messageContent.Content}");
+Console.WriteLine($"AI response: {messageContent.Content}");
