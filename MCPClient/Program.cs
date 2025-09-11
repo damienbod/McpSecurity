@@ -1,69 +1,82 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using MCPClient;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.ChatCompletion;
 using ModelContextProtocol.Client;
 
+// load configuration from app secrets
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
 // Prepare and build kernel
-var builder = Kernel.CreateBuilder();
-builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
-builder.Services.AddAzureOpenAIChatCompletion(
-    config["OpenAI:ModelId"],
-    config["OpenAI:Endpoint"],
-    config["OpenAI:ApiKey"]!);
+var kernel = SemanticKernelHelper.GetKernel(config);
 
-Kernel kernel = builder.Build();
+// initialize MCP client
+using var httpClient = new HttpClient();
+var transport = McpHelper.CreateMcpTransport(httpClient);
+await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport);
 
-// We can customize a shared HttpClient with a custom handler if desired
-using var sharedHandler = new SocketsHttpHandler
+// Retrieve the list of tools available on the MCP server and import them to the kernel
+await kernel.ImportMcpClientFunctionsAsync(mcpClient);
+
+// Prepare execution
+var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: false);
+//var prompt = "Please generate a random number";
+var prompt = "Please generate a random number with the ragne of -10 and 10";
+//var prompt = "Please generate a random number based from the current date";
+//var prompt = "Please generate five random numbers?";
+//var prompt = "Please generate two random numbers. Use these numbers to generate a thrid random number within the range of the first two.";
+
+var chatHistory = SemanticKernelHelper.InitializeHistory(prompt);
+Console.WriteLine($"User: {prompt}");
+var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
+// execute prompt
+var messageContent = await chatCompletionService.GetChatMessageContentAsync(chatHistory, executionSettings, kernel);
+
+// New way of accessing function calls using connector agnostic function calling model classes.
+var functionCalls = FunctionCallContent.GetFunctionCalls(messageContent).ToArray();
+var functionCalled = false;
+
+// human-in-the-loop for function calling approval
+while (functionCalls.Length != 0)
 {
-    PooledConnectionLifetime = TimeSpan.FromMinutes(2),
-    PooledConnectionIdleTimeout = TimeSpan.FromMinutes(1)
-};
-using var httpClient = new HttpClient(sharedHandler);
+    // Adding function call from AI model to chat history
+    chatHistory.Add(messageContent);
 
-var serverUrl = "https://localhost:7133/mcp";
-var transport = new SseClientTransport(new()
-{
-    Endpoint = new Uri(serverUrl),
-    Name = "Secure Weather Client",
-    //OAuth = new()
-    //{
-    //    ClientName = "ProtectedMcpClient",
-    //    RedirectUri = new Uri("http://localhost:1179/callback"),
+    // Iterating over the requested function calls and invoking them
+    foreach (var functionCall in functionCalls)
+    {
+        // approve function call
+        Console.WriteLine($"Please allow/decline function execution with: {functionCall.FunctionName} with arguments: {string.Join(';', functionCall.Arguments.Select(x => $"{x.Key}:{x.Value}"))} [y,n]");
+        var key = Console.ReadKey();
+        Console.WriteLine();
 
-    //}
-}, httpClient);
+        if (key.KeyChar != 'y' && key.KeyChar != 'Y')
+        {
+            Console.WriteLine($"Function call {functionCall.FunctionName} declined");
+            chatHistory.Add(new FunctionResultContent(functionCall.FunctionName, functionCall.PluginName, functionCall.Id).ToChatMessage());
+            continue;
+        }
 
-// Create an MCPClient for the protected MCP server
-await using var mcpClient = await McpClientFactory.CreateAsync(transport);
+        functionCalled = true;
+        var result = await functionCall.InvokeAsync(kernel);
+        chatHistory.Add(result.ToChatMessage());
+        Console.WriteLine($"Function call : {result.InnerContent}");
+    }
 
-
-// Retrieve the list of tools available on the MCP server
-var tools = await mcpClient.ListToolsAsync().ConfigureAwait(false);
-foreach (var tool in tools)
-{
-    Console.WriteLine($"{tool.Name}: {tool.Description}");
+    // Sending the functions invocation results to the AI model to get the final response
+    if (functionCalled)
+    {
+        messageContent = await chatCompletionService.GetChatMessageContentAsync(chatHistory, executionSettings, kernel);
+        functionCalls = FunctionCallContent.GetFunctionCalls(messageContent).ToArray();
+    }
+    else
+    {
+        functionCalls = [];
+    }
 }
 
-kernel.Plugins.AddFromFunctions("Tools", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
-
-// Enable automatic function calling
-#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-OpenAIPromptExecutionSettings executionSettings = new()
-{
-    Temperature = 0,
-    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(options: new() { RetainArgumentTypes = true })
-};
-#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
-// Test using GitHub tools
-var prompt = "Please generate a random number?";
-var result = await kernel.InvokePromptAsync(prompt, new(executionSettings)).ConfigureAwait(false);
-Console.WriteLine($"\n\n{prompt}\n{result}");
+Console.WriteLine($"AI response: {messageContent.Content}");

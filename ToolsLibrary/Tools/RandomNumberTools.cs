@@ -16,4 +16,21 @@ public class RandomNumberTools
     {
         return Random.Shared.Next(min, max);
     }
+
+    [McpServerTool]
+    [Description("Generates a random number based on a date.")]
+    public int GetRandomNumberFromDateTime(
+        [Description("The date to generate random number from")] DateTime? datetime = null)
+    {
+        if (datetime == null)
+        {
+            datetime = DateTime.Now;
+        }
+
+        var min = (int)datetime.Value.Ticks % 100;
+        var max = min + 1_000;
+
+        return Random.Shared.Next(min, max);
+    }
 }
+
