@@ -28,6 +28,10 @@ public class IndexModel : PageModel
         var accessToken = await _tokenAcquisition
             .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/access_as_user"]);
 
+        var accessToken2 = await _tokenAcquisition
+           .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
+
+
         var t = "";
     }
 }
