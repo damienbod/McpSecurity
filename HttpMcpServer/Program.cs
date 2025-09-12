@@ -4,10 +4,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
        .AddMcpServer()
-       .WithHttpTransport(o => o.Stateless = true)
+       .WithHttpTransport()
        .WithTools<RandomNumberTools>()
        .WithTools<DateTools>()
        .WithTools<WeatherTools>();
+
+// Add CORS for HTTP transport support in browsers
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddHttpClient();
 
@@ -17,7 +28,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
-app.MapGet("/ping", () => $"MCP server running UTC: {DateTime.UtcNow}");
+// Enable CORS
+app.UseCors();
+
+app.MapGet("/health", () => $"MCP server running deployed: UTC: {DateTime.UtcNow}");
 
 app.MapMcp("/mcp");
 
