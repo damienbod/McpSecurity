@@ -1,15 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24 d17.14
+VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleMcpServer", "SampleMcpServer.csproj", "{95C7F689-2670-870B-E7E3-138C9D01C508}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolsLibrary", "ToolsLibrary\ToolsLibrary.csproj", "{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolsLibrary", "..\ToolsLibrary\ToolsLibrary.csproj", "{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpMcpServer", "HttpMcpServer\HttpMcpServer.csproj", "{FC243199-26D9-42CC-AB94-809A9570E273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpMcpServer", "..\HttpMcpServer\HttpMcpServer.csproj", "{FC243199-26D9-42CC-AB94-809A9570E273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPClient", "MCPClient\MCPClient.csproj", "{F734AB09-82A2-4167-860E-78053312AD96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPClient", "..\MCPClient\MCPClient.csproj", "{F734AB09-82A2-4167-860E-78053312AD96}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\azure-webapps-dotnet-core.yml = .github\workflows\azure-webapps-dotnet-core.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +20,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{95C7F689-2670-870B-E7E3-138C9D01C508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95C7F689-2670-870B-E7E3-138C9D01C508}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95C7F689-2670-870B-E7E3-138C9D01C508}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95C7F689-2670-870B-E7E3-138C9D01C508}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}.Release|Any CPU.ActiveCfg = Release|Any CPU

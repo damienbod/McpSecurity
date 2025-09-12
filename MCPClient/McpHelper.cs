@@ -6,8 +6,6 @@ public class McpHelper
 {
     public static IClientTransport CreateMcpTransport(HttpClient httpClient)
     {
-
-
         var serverUrl = "https://localhost:7133/mcp";
         var transport = new SseClientTransport(new()
         {

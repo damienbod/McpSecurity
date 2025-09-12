@@ -6,9 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include=".mcp\server.json">
+      <PackagePath>/.mcp/</PackagePath>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
 
   <ItemGroup>
-    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.2" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
   </ItemGroup>
 
 

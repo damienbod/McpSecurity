@@ -2,7 +2,6 @@ using ToolsLibrary.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services
        .AddMcpServer()
        .WithHttpTransport(o => o.Stateless = true)
@@ -17,6 +16,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
+
+app.MapGet("/ping", () => "MCP server running");
 
 app.MapMcp("/mcp");
 
