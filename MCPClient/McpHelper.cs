@@ -12,12 +12,12 @@ public class McpHelper
         {
             Endpoint = new Uri(serverUrl),
             Name = "Secure Weather Client",
-            //OAuth = new()
-            //{
-            //    ClientName = "ProtectedMcpClient",
-            //    RedirectUri = new Uri("http://localhost:1179/callback"),
+            OAuth = new()
+            {
+                ClientName = "ProtectedMcpClient",
+                RedirectUri = new Uri("http://localhost:1179/callback"), 
 
-            //}
+            }
         }, httpClient);
 
         return transport;
