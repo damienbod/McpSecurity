@@ -13,6 +13,11 @@
     <PackageReference Include="Microsoft.Identity.Web" Version="3.0.0" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.0.0" />
     <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="3.0.0" />
+
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.64.0" />
+    <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.4" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
+    
   </ItemGroup>
 
 </Project>
