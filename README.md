@@ -144,3 +144,9 @@ https://github.com/microsoft/mcp-for-beginners
 ## Azure App Service MCP server
 
 https://github.com/Azure-Samples/remote-mcp-webapp-dotnet
+
+## Testing MCP Client tool
+
+```
+npx @modelcontextprotocol/inspector
+```
