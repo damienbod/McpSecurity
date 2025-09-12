@@ -21,6 +21,5 @@ public class McpHelper
         }, httpClient);
 
         return transport;
-
     }
 }
