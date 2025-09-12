@@ -21,9 +21,10 @@ name: Build and deploy MCP Server
 
 env:
   AZURE_WEBAPP_NAME: mcpoauthsecurity # mcpoauthsecurity-hag0drckepathyb6   
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  AZURE_WEBAPP_PACKAGE_PATH: 'HttpMcpServer'      # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '9'                 # set this to the .NET Core version to use
-
+  CONFIGURATION: Release
+  WORKING_DIRECTORY: HttpMcpServer
 on:
   push:
     branches: [ "deploy-mcp-server" ]
@@ -53,10 +54,10 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/HttpMcpServer
+        run: dotnet publish "${{ env.WORKING_DIRECTORY }}" -c Release -o ${{env.DOTNET_ROOT}}/HttpMcpServer
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
