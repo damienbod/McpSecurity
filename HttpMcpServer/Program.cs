@@ -23,7 +23,7 @@ builder.Services.AddAuthentication()
         Resource = new Uri(serverUrl),
         ResourceDocumentation = new Uri("https://docs.example.com/api/weather"),
         //AuthorizationServers = { new Uri(inMemoryOAuthServerUrl) },
-        ScopesSupported = ["mcp:tools", "api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/access_as_user"],
+        ScopesSupported = ["mcp:tools"],
     };
 });
 
