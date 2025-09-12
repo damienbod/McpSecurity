@@ -24,10 +24,10 @@ await kernel.ImportMcpClientFunctionsAsync(mcpClient);
 // Prepare execution
 var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: false);
 //var prompt = "Please generate a random number";
-var prompt = "Please generate a random number with the ragne of -10 and 10";
+var prompt = "Please generate a random number with the range of -10 and 10";
 //var prompt = "Please generate a random number based from the current date";
 //var prompt = "Please generate five random numbers?";
-//var prompt = "Please generate two random numbers. Use these numbers to generate a thrid random number within the range of the first two.";
+//var prompt = "Please generate two random numbers. Use these numbers to generate a third random number within the range of the first two.";
 
 var chatHistory = SemanticKernelHelper.InitializeHistory(prompt);
 Console.WriteLine($"User: {prompt}");
