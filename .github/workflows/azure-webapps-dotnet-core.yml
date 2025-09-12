@@ -4,7 +4,7 @@ name: Build and deploy MCP Server
 on:
   push:
     branches:
-    - deploy
+    - deploy-mcp-server
 env:
   AZURE_WEBAPP_NAME: mcpoauthsecurity
   AZURE_WEBAPP_PACKAGE_PATH: HttpMcpServer/published
