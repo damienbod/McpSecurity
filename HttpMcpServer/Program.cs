@@ -17,7 +17,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 
-app.MapGet("/ping", () => "MCP server running");
+app.MapGet("/ping", () => $"MCP server running UTC: {DateTime.UtcNow}");
 
 app.MapMcp("/mcp");
 

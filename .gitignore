@@ -3,3 +3,4 @@
 **/.vscode/**
 **/bin/**
 **/obj/**
+/HttpMcpServer/HttpMcpServer.csproj.user
