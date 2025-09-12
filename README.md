@@ -140,3 +140,7 @@ https://devblogs.microsoft.com/azure-sdk/introducing-the-azure-mcp-server/
 ## Learning Courses
 
 https://github.com/microsoft/mcp-for-beginners
+
+## Azure App Service MCP server
+
+https://github.com/Azure-Samples/remote-mcp-webapp-dotnet
