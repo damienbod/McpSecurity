@@ -1,0 +1,41 @@
+﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+
+namespace McpWebClient.AiServices;
+
+public static class SemanticKernelHelper
+{
+    public static OpenAIPromptExecutionSettings CreatePromptSettings(bool autoInvokeTools)
+    {
+        // Enable automatic function calling
+#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        return new()
+        {
+            Temperature = 0,
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: autoInvokeTools, options: new() { RetainArgumentTypes = true })
+        };
+#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+    }
+
+    public static ChatHistory InitializeHistory(string prompt)
+    {
+        var chatHistory = new ChatHistory();
+        chatHistory.AddUserMessage(prompt);
+        return chatHistory;
+    }
+
+    public static Kernel GetKernel(IConfigurationRoot config)
+    {
+        // Prepare and build kernel
+        var builder = Kernel.CreateBuilder();
+        builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
+        builder.Services.AddAzureOpenAIChatCompletion(
+            config["OpenAI:ModelId"],
+            config["OpenAI:Endpoint"],
+            config["OpenAI:ApiKey"]!);
+
+        return builder.Build();
+    }
+}

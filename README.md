@@ -144,3 +144,27 @@ https://github.com/microsoft/mcp-for-beginners
 ## Azure App Service MCP server
 
 https://github.com/Azure-Samples/remote-mcp-webapp-dotnet
+
+## Testing MCP Client tool
+
+```
+npx @modelcontextprotocol/inspector
+```
+
+https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMcpClient/Program.cs
+
+## App registrations
+
+**Http MCP Server**
+
+ClientID: 96b0f495-3b65-4c8f-a0c6-c3767c3365ed
+TenantID: 5698af84-5720-4ff0-bdc3-9d9195314244
+Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools
+
+**Http MCP Client**
+
+ClientID: 344677a4-a975-4cba-a4b0-2d0771847938
+TenantID: 5698af84-5720-4ff0-bdc3-9d9195314244
+Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools
+Secret: 
+RedirectUrl: https://localhost:5001/signin-oidc
