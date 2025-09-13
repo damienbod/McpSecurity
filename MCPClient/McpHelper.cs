@@ -15,7 +15,7 @@ public class McpHelper
             OAuth = new()
             {
                 ClientName = "ProtectedMcpClient",
-                RedirectUri = new Uri("http://localhost:1179/callback"), 
+                RedirectUri = new Uri("http://localhost:1179/callback"),
 
             }
         }, httpClient);

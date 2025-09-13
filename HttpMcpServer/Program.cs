@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
-using ModelContextProtocol.AspNetCore.Authentication;
 using ToolsLibrary.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +7,7 @@ builder.Services
     .AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
 
 var serverUrl = "https://localhost:5001";
-if(!builder.Environment.IsDevelopment())
+if (!builder.Environment.IsDevelopment())
 {
     serverUrl = "https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net";
 }

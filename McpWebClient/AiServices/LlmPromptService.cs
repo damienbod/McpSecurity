@@ -1,12 +1,8 @@
-﻿using Azure.Core;
-using McpWebClient.AiServices;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
+﻿using McpWebClient.AiServices;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using ModelContextProtocol.Client;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 
 namespace McpWebClient;
 
@@ -55,14 +51,14 @@ public class LlmPromptService
             Endpoint = new Uri(httpMcpServerUrl),
             Name = "Secure Client",
 
-            // TODO validate if we need this, using AT directly from web app
-            OAuth = new()
-            {
-                ClientName = "HttpMcpClient",
-                RedirectUri = new Uri("https://localhost:5001/signin-oidc"), 
-                ClientId = "344677a4-a975-4cba-a4b0-2d0771847938",
-                Scopes = ["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"],
-            }
+            // Not required if we pass the AT in the HttpClient
+            //OAuth = new()
+            //{
+            //    ClientName = "HttpMcpClient",
+            //    RedirectUri = new Uri("https://localhost:5001/signin-oidc"),
+            //    ClientId = "344677a4-a975-4cba-a4b0-2d0771847938",
+            //    Scopes = ["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"],
+            //}
         }, httpClient);
 
         return transport;
@@ -94,8 +90,8 @@ public class LlmPromptService
             {
                 // disable function 
                 // chatHistory.Add(new FunctionResultContent(functionCall.FunctionName, functionCall.PluginName, functionCall.Id).ToChatMessage());
-                
-                functionCalled = true;          
+
+                functionCalled = true;
                 var result = await functionCall.InvokeAsync(_kernel);
                 chatHistory.Add(result.ToChatMessage());
             }
