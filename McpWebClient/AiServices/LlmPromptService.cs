@@ -10,7 +10,7 @@ public class LlmPromptService
 {
     private readonly IConfiguration _configuration;
     private Kernel _kernel;
-    private IMcpClient _mcpClient;
+    private IMcpClient _mcpClient = null!;
 
     public LlmPromptService(IConfiguration configuration)
     {
