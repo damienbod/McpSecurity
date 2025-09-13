@@ -17,7 +17,7 @@ builder.Services.AddAuthentication()
     options.ResourceMetadata = new()
     {
         Resource = new Uri(httpMcpServerUrl),
-        ResourceDocumentation = new Uri("https://docs.example.com/api/weather"),
+        ResourceDocumentation = new Uri("https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net/health"),
         //AuthorizationServers = { new Uri(inMemoryOAuthServerUrl) },
         ScopesSupported = ["mcp:tools"],
     };
@@ -54,7 +54,7 @@ app.UseHttpsRedirection();
 // Enable CORS
 app.UseCors();
 
-app.MapGet("/health", () => $"MCP server running deployed: UTC: {DateTime.UtcNow}");
+app.MapGet("/health", () => $"Secure MCP server running deployed: UTC: {DateTime.UtcNow}, use /mcp path to use the tools");
 
 app.UseAuthentication();
 app.UseAuthorization();
