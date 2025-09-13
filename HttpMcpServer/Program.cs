@@ -3,13 +3,12 @@ using ToolsLibrary.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services
-    .AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
 
-var serverUrl = "https://localhost:5001";
+var httpMcpServerUrl = "https://localhost:5001";
 if (!builder.Environment.IsDevelopment())
 {
-    serverUrl = "https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net";
+    httpMcpServerUrl = "https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net";
 }
 
 builder.Services.AddAuthentication()
@@ -17,7 +16,7 @@ builder.Services.AddAuthentication()
 {
     options.ResourceMetadata = new()
     {
-        Resource = new Uri(serverUrl),
+        Resource = new Uri(httpMcpServerUrl),
         ResourceDocumentation = new Uri("https://docs.example.com/api/weather"),
         //AuthorizationServers = { new Uri(inMemoryOAuthServerUrl) },
         ScopesSupported = ["mcp:tools"],
