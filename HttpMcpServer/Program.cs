@@ -47,6 +47,7 @@ builder.Services.AddHttpClient();
 
 // change to scp or scope if not using magic namespaces from MS
 // The scope must be validate as we want to force only delegated access tokens
+// The scope is requires to only allow access tokens intended for this API
 builder.Services.AddAuthorizationBuilder()
   .AddPolicy("mcp_tools", policy =>
         policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:tools"));
