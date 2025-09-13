@@ -38,8 +38,12 @@ public class IndexModel : PageModel
         _llmPromptService = llmPromptService;
     }
 
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGetAsync()
     {
+        // we have an access token
+        var accessToken = await _tokenAcquisition
+           .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
+
         return Page();
     }
 
@@ -48,7 +52,7 @@ public class IndexModel : PageModel
         if (!ModelState.IsValid)
         {
             // Something failed. Redisplay the form.
-            return OnGet();
+            return await OnGetAsync();
         }
 
         // we have an access token
@@ -66,7 +70,7 @@ public class IndexModel : PageModel
         PromptResults = await _llmPromptService.Chat(Prompt);
 
         // Redisplay the form.
-        return OnGet();
+        return await OnGetAsync();
     }
 
   
