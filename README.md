@@ -159,12 +159,12 @@ https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMc
 
 ClientID: 96b0f495-3b65-4c8f-a0c6-c3767c3365ed
 TenantID: 5698af84-5720-4ff0-bdc3-9d9195314244
-Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/access_as_user
+Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools
 
 **Http MCP Client**
 
 ClientID: 344677a4-a975-4cba-a4b0-2d0771847938
 TenantID: 5698af84-5720-4ff0-bdc3-9d9195314244
-Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/access_as_user
+Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools
 Secret: 
 RedirectUrl: https://localhost:5001/signin-oidc

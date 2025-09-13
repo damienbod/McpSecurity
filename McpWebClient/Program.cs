@@ -27,6 +27,8 @@ public class Program
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
+        builder.Services.AddScoped<LlmPromptService>();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
