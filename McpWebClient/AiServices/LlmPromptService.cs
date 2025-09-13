@@ -14,6 +14,7 @@ public class LlmPromptService
 {
     private readonly IConfiguration _configuration;
     private Kernel _kernel;
+    private IMcpClient _mcpClient;
 
     public LlmPromptService(IConfiguration configuration)
     {
@@ -32,10 +33,10 @@ public class LlmPromptService
     {
         // initialize MCP client
         var transport = CreateMcpTransport(clientFactory, accessToken);
-        await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport);
+        _mcpClient = await McpClientFactory.CreateAsync(transport);
 
         // Retrieve the list of tools available on the MCP server and import them to the kernel
-        await _kernel.ImportMcpClientFunctionsAsync(mcpClient);
+        await _kernel.ImportMcpClientFunctionsAsync(_mcpClient);
     }
 
     private IClientTransport CreateMcpTransport(IHttpClientFactory clientFactory, string accessToken)
@@ -93,8 +94,8 @@ public class LlmPromptService
             {
                 // disable function 
                 // chatHistory.Add(new FunctionResultContent(functionCall.FunctionName, functionCall.PluginName, functionCall.Id).ToChatMessage());
-                // functionCalled = true;
                 
+                functionCalled = true;          
                 var result = await functionCall.InvokeAsync(_kernel);
                 chatHistory.Add(result.ToChatMessage());
             }
