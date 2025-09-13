@@ -32,7 +32,7 @@ public class IndexModel : PageModel
         var accessToken = await _tokenAcquisition
            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
 
-        await _llmPromptService.Setup(_clientFactory);
+        await _llmPromptService.Setup(_clientFactory, accessToken);
 
         //var prompt = "Please generate a random number";
         var prompt = "Please generate a random number with the range of -10 and 10";

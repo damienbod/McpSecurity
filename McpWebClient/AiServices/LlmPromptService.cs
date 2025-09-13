@@ -1,44 +1,60 @@
-﻿using McpWebClient.AiServices;
+﻿using Azure.Core;
+using McpWebClient.AiServices;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using ModelContextProtocol.Client;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 
 namespace McpWebClient;
 
 public class LlmPromptService
 {
-    private readonly IConfigurationRoot _configuration;
+    private readonly IConfiguration _configuration;
     private Kernel _kernel;
 
-    public LlmPromptService(IConfigurationRoot configuration)
+    public LlmPromptService(IConfiguration configuration)
     {
         _configuration = configuration;
+
+        // TODO fix, add this into web configuration
+        var config = new ConfigurationBuilder()
+        .AddUserSecrets<Program>()
+        .Build();
+
         // Prepare and build kernel
-        _kernel = SemanticKernelHelper.GetKernel(_configuration);
+        _kernel = SemanticKernelHelper.GetKernel(config);
     }
 
-    public async Task Setup(IHttpClientFactory clientFactory)
+    public async Task Setup(IHttpClientFactory clientFactory, string accessToken)
     {
         // initialize MCP client
-        var transport = CreateMcpTransport(clientFactory);
+        var transport = CreateMcpTransport(clientFactory, accessToken);
         await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport);
 
         // Retrieve the list of tools available on the MCP server and import them to the kernel
         await _kernel.ImportMcpClientFunctionsAsync(mcpClient);
     }
 
-    private static IClientTransport CreateMcpTransport(IHttpClientFactory clientFactory)
+    private IClientTransport CreateMcpTransport(IHttpClientFactory clientFactory, string accessToken)
     {
         var httpClient = clientFactory.CreateClient();
-        //var serverUrl = "https://localhost:7133/mcp";
-        var serverUrl = "https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net/mcp";
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var httpMcpServerUrl = _configuration["HttpMcpServerUrl"];
+        if (string.IsNullOrEmpty(httpMcpServerUrl))
+        {
+            throw new ArgumentNullException("Configuration missing for HttpMcpServerUrl");
+        }
+
         var transport = new SseClientTransport(new()
         {
-            Endpoint = new Uri(serverUrl),
+            Endpoint = new Uri(httpMcpServerUrl),
             Name = "Secure Client",
+
+            // TODO validate if we need this, using AT directly from web app
             OAuth = new()
             {
                 ClientName = "HttpMcpClient",
