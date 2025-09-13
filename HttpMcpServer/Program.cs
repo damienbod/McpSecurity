@@ -45,6 +45,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHttpClient();
 
+// change to scp or scope if not using magic namespaces from MS
+// The scope must be validate as we want to force only delegated access tokens
+builder.Services.AddAuthorizationBuilder()
+  .AddPolicy("mcp_tools", policy =>
+        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:tools"));
+
 // Add services to the container.
 var app = builder.Build();
 
@@ -59,6 +65,6 @@ app.MapGet("/health", () => $"Secure MCP server running deployed: UTC: {DateTime
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapMcp("/mcp").RequireAuthorization();
+app.MapMcp("/mcp").RequireAuthorization("mcp_tools");
 
 app.Run();
