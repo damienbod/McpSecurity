@@ -6,13 +6,13 @@
 
 <form asp-page="IndexModel" method="post">
 
-    <div class="form-group">
+    <div class="mb-3 mt-3">
         <label class="form-label" for="Message">Prompt:</label>
         <textarea class="form-control" rows="5" id="Prompt" name="Prompt">@Model.Prompt</textarea>
         <span asp-validation-for="Prompt" style="color:red"></span>
     </div>
 
-    <div class="field">
+    <div class="mb-3 mt-3">
         <div class="control">
             <button type="submit" class="w-100 btn btn-lg btn-primary">Send Prompt</button>
         </div>
@@ -22,4 +22,5 @@
 
 <br />
 <br />
+
 <textarea class="form-control" rows="5" id="PromptResults" name="PromptResults" readonly>@Model.PromptResults</textarea>

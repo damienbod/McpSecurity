@@ -40,10 +40,6 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        // we have an access token
-        var accessToken = await _tokenAcquisition
-           .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
-
         return Page();
     }
 
