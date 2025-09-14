@@ -153,6 +153,8 @@ npx @modelcontextprotocol/inspector
 
 https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMcpClient/Program.cs
 
+https://github.com/Azure-Samples/ms-identity-dotnet-desktop-tutorial/blob/master/1-Calling-MSGraph/1-1-AzureAD/Console-Interactive-MultiTarget/Program.cs
+
 ## App registrations
 
 **Http MCP Server**
