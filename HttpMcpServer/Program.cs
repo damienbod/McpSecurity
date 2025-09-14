@@ -2,14 +2,8 @@ using Microsoft.Identity.Web;
 using ToolsLibrary.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
-
-var httpMcpServerUrl = "https://localhost:5001";
-if (!builder.Environment.IsDevelopment())
-{
-    httpMcpServerUrl = "https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net";
-}
+var httpMcpServerUrl = builder.Configuration["HttpMcpServerUrl"];
 
 builder.Services.AddAuthentication()
 .AddMcp(options =>
