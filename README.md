@@ -131,6 +131,10 @@ https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository
 
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
 
+## Azure Open AI 
+
+https://learn.microsoft.com/en-us/azure/ai-foundry/
+
 ## Ready to use servers
 
 https://mcpservers.org/
