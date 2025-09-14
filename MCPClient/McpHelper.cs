@@ -28,11 +28,10 @@ public class McpHelper
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var serverUrl = "https://localhost:7133/mcp";
-        //var serverUrl = "https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net/mcp";
+        var httpMcpServer = configuration["HttpMcpServerUrl"];
         var transport = new SseClientTransport(new()
         {
-            Endpoint = new Uri(serverUrl),
+            Endpoint = new Uri(httpMcpServer!),
             Name = "MCP Desktop Client",
             //OAuth = new()
             //{
