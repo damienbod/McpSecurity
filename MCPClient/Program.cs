@@ -8,6 +8,8 @@ using ModelContextProtocol.Client;
 // load configuration from app secrets
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
+    .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
     .Build();
 
 // Prepare and build kernel
@@ -15,7 +17,7 @@ var kernel = SemanticKernelHelper.GetKernel(config);
 
 // initialize MCP client
 using var httpClient = new HttpClient();
-var transport = McpHelper.CreateMcpTransport(httpClient);
+var transport = await McpHelper.CreateMcpTransportAsync(httpClient, config);
 await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport);
 
 // Retrieve the list of tools available on the MCP server and import them to the kernel
