@@ -168,3 +168,10 @@ TenantID: 5698af84-5720-4ff0-bdc3-9d9195314244
 Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools
 Secret: 
 RedirectUrl: https://localhost:5001/signin-oidc
+
+**Http MCP Desktop Client**
+
+ClientID: eff6bb0e-9871-458f-92ea-923c02250a05
+TenantID: 5698af84-5720-4ff0-bdc3-9d9195314244
+Scope: api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools
+RedirectUri: http://localhost:1179/callback
