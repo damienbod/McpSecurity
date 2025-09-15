@@ -1,4 +1,6 @@
 using Microsoft.Identity.Web;
+using ToolsLibrary.Prompts;
+using ToolsLibrary.Resources;
 using ToolsLibrary.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +14,6 @@ builder.Services.AddAuthentication()
     {
         Resource = new Uri(httpMcpServerUrl),
         ResourceDocumentation = new Uri("https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net/health"),
-        //AuthorizationServers = { new Uri(inMemoryOAuthServerUrl) },
         ScopesSupported = ["mcp:tools"],
     };
 });
@@ -22,9 +23,10 @@ builder.Services.AddAuthorization();
 builder.Services
        .AddMcpServer()
        .WithHttpTransport()
+       .WithPrompts<PromptExamples>()
+       .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()
-       .WithTools<DateTools>()
-       .WithTools<WeatherTools>();
+       .WithTools<DateTools>();
 
 // Add CORS for HTTP transport support in browsers
 builder.Services.AddCors(options =>

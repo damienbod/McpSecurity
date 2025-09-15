@@ -8,8 +8,9 @@ public class DateTools
 {
     [McpServerTool]
     [Description("Returns the current date and time in ISO 8601 format.")]
-    public string GetCurrentDateTime()
-    {
-        return DateTime.UtcNow.ToString("o");
-    }
+    public Task<string> GetCurrentDateTime(IMcpServer mcpServer)
+        => ElicitationHelper.InvokeEliciation(
+            mcpServer,
+            nameof(GetCurrentDateTime),
+            () => DateTime.UtcNow.ToString("o"));
 }

@@ -1,10 +1,9 @@
+using McpWebClient.AiServices.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Web;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.Xml;
-using System.Text.Json;
+using System.Security.Claims;
 
 namespace McpWebClient.Pages;
 
@@ -12,10 +11,9 @@ namespace McpWebClient.Pages;
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly LlmPromptService _llmPromptService;
+    private readonly ChatService _llmPromptService;
     private readonly IHttpClientFactory _clientFactory;
     private readonly ITokenAcquisition _tokenAcquisition;
-    private readonly IConfiguration _configuration;
 
     [BindProperty]
     public string? PromptResults { get; set; }
@@ -24,50 +22,82 @@ public class IndexModel : PageModel
     [Required]
     public string Prompt { get; set; } = "Please generate a random number with the range of -10 and 10";
 
+    [BindProperty]
+    [Required]
+    public ApprovalMode SelectedMode { get; set; } = ApprovalMode.Manual;
+
+    public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
 
     public IndexModel(ILogger<IndexModel> logger,
         IHttpClientFactory clientFactory,
         ITokenAcquisition tokenAcquisition,
-        IConfiguration configuration,
-        LlmPromptService llmPromptService)
+        ChatService llmPromptService)
     {
         _clientFactory = clientFactory;
         _tokenAcquisition = tokenAcquisition;
-        _configuration = configuration;
         _logger = logger;
         _llmPromptService = llmPromptService;
     }
 
     public async Task<IActionResult> OnGetAsync()
     {
+        // No special processing on GET – state is managed via postbacks
         return Page();
+    }
+
+    private string GetUserKey()
+    {
+        return User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.Identity?.Name ?? "anonymous";
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
-            // Something failed. Redisplay the form.
             return await OnGetAsync();
         }
 
-        // we have an access token
+        _llmPromptService.SetMode(SelectedMode);
+
         var accessToken = await _tokenAcquisition
-           .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
+            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
 
-        await _llmPromptService.Setup(_clientFactory, accessToken);
+        await _llmPromptService.EnsureSetupAsync(_clientFactory, accessToken);
 
-        //var prompt = "Please generate a random number";
-        //var prompt = "Please generate a random number with the range of -10 and 10";
-        //var prompt = "Please generate a random number based from the current date";
-        //var prompt = "Please generate five random numbers?";
-        //var prompt = "Please generate two random numbers. Use these numbers to generate a third random number within the range of the first two.";
-
-        PromptResults = await _llmPromptService.Chat(Prompt);
-
-        // Redisplay the form.
-        return await OnGetAsync();
+        // Begin a fresh chat with the prompt
+        var response = await _llmPromptService.BeginChatAsync(GetUserKey(), Prompt);
+        PromptResults = response.FinalAnswer;
+        PendingFunctions = response.PendingFunctions;
+        return Page();
     }
 
-  
+    public async Task<IActionResult> OnPostApproveAsync(string functionId)
+    {
+        _llmPromptService.SetMode(SelectedMode);
+        var accessToken = await _tokenAcquisition
+            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
+
+        await _llmPromptService.EnsureSetupAsync(_clientFactory, accessToken);
+
+        var response = await _llmPromptService.ApproveFunctionAsync(GetUserKey(), functionId);
+
+        PromptResults = response.FinalAnswer;
+        PendingFunctions = response.PendingFunctions;
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostDeclineAsync(string functionId)
+    {
+        _llmPromptService.SetMode(SelectedMode);
+        var accessToken = await _tokenAcquisition
+            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
+
+        await _llmPromptService.EnsureSetupAsync(_clientFactory, accessToken);
+
+        var response = await _llmPromptService.DeclineFunctionAsync(GetUserKey(), functionId);
+
+        PromptResults = response.FinalAnswer;
+        PendingFunctions = response.PendingFunctions;
+        return Page();
+    }
 }
