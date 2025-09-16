@@ -7,14 +7,14 @@ using System.Text.Json;
 
 namespace McpWebClient;
 
-internal partial class PromptingSerivce
+internal partial class PromptingService
 {
     private readonly Kernel _kernel;
     private readonly bool _autoInvoke;
 
     private static readonly ConcurrentDictionary<string, ChatSession> _sessions = new();
 
-    public PromptingSerivce(Kernel kernel, bool autoInvoke)
+    public PromptingService(Kernel kernel, bool autoInvoke)
     {
         _kernel = kernel;
         _autoInvoke = autoInvoke;

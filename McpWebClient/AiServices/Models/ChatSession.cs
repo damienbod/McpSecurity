@@ -3,7 +3,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace McpWebClient;
 
-internal partial class PromptingSerivce
+internal partial class PromptingService
 {
     public class ChatSession
     {

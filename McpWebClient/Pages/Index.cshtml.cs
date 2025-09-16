@@ -11,7 +11,7 @@ namespace McpWebClient.Pages;
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly ChatService _llmPromptService;
+    private readonly ChatService _chatService;
     private readonly IHttpClientFactory _clientFactory;
     private readonly ITokenAcquisition _tokenAcquisition;
 
@@ -36,12 +36,12 @@ public class IndexModel : PageModel
         _clientFactory = clientFactory;
         _tokenAcquisition = tokenAcquisition;
         _logger = logger;
-        _llmPromptService = llmPromptService;
+        _chatService = llmPromptService;
     }
 
-    public async Task<IActionResult> OnGetAsync()
+    public IActionResult OnGet()
     {
-        // No special processing on GET – state is managed via postbacks
+        // No special processing on GET – state is managed via post backs
         return Page();
     }
 
@@ -54,18 +54,18 @@ public class IndexModel : PageModel
     {
         if (!ModelState.IsValid)
         {
-            return await OnGetAsync();
+            return OnGet();
         }
 
-        _llmPromptService.SetMode(SelectedMode);
+        _chatService.SetMode(SelectedMode);
 
         var accessToken = await _tokenAcquisition
             .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
 
-        await _llmPromptService.EnsureSetupAsync(_clientFactory, accessToken);
+        await _chatService.EnsureSetupAsync(_clientFactory, accessToken);
 
         // Begin a fresh chat with the prompt
-        var response = await _llmPromptService.BeginChatAsync(GetUserKey(), Prompt);
+        var response = await _chatService.BeginChatAsync(GetUserKey(), Prompt);
         PromptResults = response.FinalAnswer;
         PendingFunctions = response.PendingFunctions;
         return Page();
@@ -73,13 +73,13 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostApproveAsync(string functionId)
     {
-        _llmPromptService.SetMode(SelectedMode);
+        _chatService.SetMode(SelectedMode);
         var accessToken = await _tokenAcquisition
             .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
 
-        await _llmPromptService.EnsureSetupAsync(_clientFactory, accessToken);
+        await _chatService.EnsureSetupAsync(_clientFactory, accessToken);
 
-        var response = await _llmPromptService.ApproveFunctionAsync(GetUserKey(), functionId);
+        var response = await _chatService.ApproveFunctionAsync(GetUserKey(), functionId);
 
         PromptResults = response.FinalAnswer;
         PendingFunctions = response.PendingFunctions;
@@ -88,13 +88,13 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostDeclineAsync(string functionId)
     {
-        _llmPromptService.SetMode(SelectedMode);
+        _chatService.SetMode(SelectedMode);
         var accessToken = await _tokenAcquisition
             .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
 
-        await _llmPromptService.EnsureSetupAsync(_clientFactory, accessToken);
+        await _chatService.EnsureSetupAsync(_clientFactory, accessToken);
 
-        var response = await _llmPromptService.DeclineFunctionAsync(GetUserKey(), functionId);
+        var response = await _chatService.DeclineFunctionAsync(GetUserKey(), functionId);
 
         PromptResults = response.FinalAnswer;
         PendingFunctions = response.PendingFunctions;
