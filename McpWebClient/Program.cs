@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using McpWebClient.Hubs;
+using McpWebClient.AiServices.Elicitation;
 
 namespace McpWebClient;
 
@@ -17,14 +19,15 @@ public class Program
 
         builder.Services.AddAuthorization(options =>
         {
-            // By default, all incoming requests will be authorized according to the default policy.
             options.FallbackPolicy = options.DefaultPolicy;
         });
 
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
-        builder.Services.AddScoped<LlmPromptService>();
+        builder.Services.AddSignalR();
+        builder.Services.AddSingleton<ElicitationCoordinator>();
+        builder.Services.AddScoped<ChatService>();
 
         var app = builder.Build();
 
@@ -46,6 +49,7 @@ public class Program
         app.MapRazorPages()
            .WithStaticAssets();
         app.MapControllers();
+        app.MapHub<ElicitationHub>("/hubs/elicitation");
 
         app.Run();
     }

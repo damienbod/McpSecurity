@@ -4,22 +4,66 @@
     ViewData["Title"] = "Lets MCP it";
 }
 
-<form asp-page="IndexModel" method="post">
+<!-- Explicit asp-page to avoid inheriting any existing ?handler=Approve query when reusing page URL -->
+<form method="post" asp-page="Index">
+    <div class="mb-3">
+        <label class="form-label" for="SelectedMode">Approval Mode:</label>
+        <select class="form-select" id="SelectedMode" name="SelectedMode" asp-for="SelectedMode" asp-items="Html.GetEnumSelectList<ApprovalMode>()"></select>
+        <span asp-validation-for="SelectedMode" class="text-danger"></span>
+    </div>
 
     <div class="mb-3 mt-3">
-        <label class="form-label" for="Message">Prompt:</label>
+        <label class="form-label" for="Prompt">Prompt:</label>
         <textarea class="form-control" rows="5" id="Prompt" name="Prompt">@Model.Prompt</textarea>
-        <span asp-validation-for="Prompt" style="color:red"></span>
+        <span asp-validation-for="Prompt" class="text-danger"></span>
     </div>
+
 
     <div class="mb-3 mt-3">
         <div class="control">
             <button type="submit" class="w-100 btn btn-lg btn-primary">Send Prompt</button>
         </div>
     </div>
-
 </form>
 
+@if (Model.PendingFunctions.Any())
+{
+    <div class="card mt-4">
+        <div class="card-header">Pending Tool Approvals (@Model.PendingFunctions.Count)</div>
+        <div class="card-body">
+            <p>The model requested the following tool calls. Approve or decline individually.</p>
+            <ul class="list-group">
+                @foreach (var f in Model.PendingFunctions)
+                {
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div><strong>Function:</strong> @f.PluginName.@f.FunctionName</div>
+                                <div><strong>Id:</strong> @f.Id</div>
+                            </div>
+                            <div class="text-end">
+                                <form method="post" asp-page-handler="Approve" asp-route-functionId="@f.Id" class="d-inline">
+                                    <input type="hidden" name="Prompt" value="@Model.Prompt" />
+                                    <input type="hidden" name="SelectedMode" value="@Model.SelectedMode" />
+                                    <button type="submit" class="btn btn-sm btn-success me-1">Approve</button>
+                                </form>
+                                <form method="post" asp-page-handler="Decline" asp-route-functionId="@f.Id" class="d-inline">
+                                    <input type="hidden" name="Prompt" value="@Model.Prompt" />
+                                    <input type="hidden" name="SelectedMode" value="@Model.SelectedMode" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="mt-2"><strong>Arguments:</strong></div>
+                        <pre class="bg-light p-2" style="white-space:pre-wrap;">@f.ArgumentsJson</pre>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
 <div class="mb-3 mt-3">
+    <label for="PromptResults" class="form-label">Chat Output</label>
     <textarea class="form-control" rows="10" id="PromptResults" name="PromptResults" readonly>@Model.PromptResults</textarea>
 </div>

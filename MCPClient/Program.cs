@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using MCPClient;
+﻿using MCPClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -8,9 +7,12 @@ using ModelContextProtocol.Client;
 // load configuration from app secrets
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
-    .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+    .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json")
     .Build();
+
+// human-in-the-loop for function calling approval
+var useMcpElicitation = false;
 
 // Prepare and build kernel
 var kernel = SemanticKernelHelper.GetKernel(config);
@@ -18,18 +20,15 @@ var kernel = SemanticKernelHelper.GetKernel(config);
 // initialize MCP client
 using var httpClient = new HttpClient();
 var transport = await McpHelper.CreateMcpTransportAsync(httpClient, config);
-await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport);
+await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport, useMcpElicitation ? McpHelper.CreateMcpClientOptions() : null);
 
 // Retrieve the list of tools available on the MCP server and import them to the kernel
 await kernel.ImportMcpClientFunctionsAsync(mcpClient);
 
 // Prepare execution
-var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: false);
-//var prompt = "Please generate a random number";
-var prompt = "Please generate a random number with the range of -10 and 10";
-//var prompt = "Please generate a random number based from the current date";
-//var prompt = "Please generate five random numbers?";
-//var prompt = "Please generate two random numbers. Use these numbers to generate a third random number within the range of the first two.";
+var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: useMcpElicitation);
+
+var prompt = "Please generate a random number";
 
 var chatHistory = SemanticKernelHelper.InitializeHistory(prompt);
 Console.WriteLine($"User: {prompt}");

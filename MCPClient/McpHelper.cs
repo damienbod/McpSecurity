@@ -1,13 +1,9 @@
-﻿using Azure.Core;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using ModelContextProtocol.Client;
-using System.Diagnostics;
-using System.Net;
+using ModelContextProtocol.Protocol;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Web;
-using static System.Net.Mime.MediaTypeNames;
+using System.Text.Json;
 
 namespace MCPClient;
 
@@ -33,14 +29,6 @@ public class McpHelper
         {
             Endpoint = new Uri(httpMcpServer!),
             Name = "MCP Desktop Client",
-            //OAuth = new()
-            //{
-            //    RedirectUri = new Uri("http://localhost"),
-            //    AuthorizationRedirectDelegate = HandleAuthorizationUrlAsync,
-            //    ClientName = "HttpMcpDesktopClient",
-            //    ClientId = "eff6bb0e-9871-458f-92ea-923c02250a05",
-            //    Scopes = ["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"],
-            //}
         }, httpClient);
 
         return transport;
@@ -71,5 +59,52 @@ public class McpHelper
         }
 
         return result.AccessToken;
+    }
+
+    public static McpClientOptions CreateMcpClientOptions()
+       => new McpClientOptions()
+       {
+           ClientInfo = new()
+           {
+               Name = "ElicitationClient",
+               Version = "1.0.0",
+           },
+           Capabilities = new()
+           {
+               Elicitation = new()
+               {
+                   ElicitationHandler = HandleElicitationAsync,
+               },
+           }
+       };
+
+    public static async ValueTask<ElicitResult> HandleElicitationAsync(ElicitRequestParams? requestParams, CancellationToken token)
+    {
+        // Bail out if the requestParams is null or if the requested schema has no properties
+        if (requestParams?.RequestedSchema?.Properties == null)
+        {
+            return new ElicitResult();
+        }
+
+        // Process the elicitation request
+        if (requestParams?.Message is not null)
+        {
+            Console.WriteLine(requestParams.Message);
+        }
+
+        Console.WriteLine($"Please allow/decline function execution with [y,n]");
+        var key = Console.ReadKey();
+        Console.WriteLine();
+
+        var userAllowance = key.KeyChar == 'y' || key.KeyChar == 'Y';
+        var content = new Dictionary<string, JsonElement>();
+        content["answer"] = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(userAllowance));
+
+        // Return the user's input
+        return new ElicitResult
+        {
+            Action = "accept",
+            Content = content
+        };
     }
 }
