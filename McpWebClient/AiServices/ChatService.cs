@@ -23,7 +23,7 @@ public class ChatService
     private bool _initialized;
     private ApprovalMode _mode = ApprovalMode.Manual;
 
-    private PromptingSerivce? _promptingService;
+    private PromptingService? _promptingService;
 
     public ChatService(IConfiguration configuration, ElicitationCoordinator elicitationCoordinator)
     {
@@ -51,7 +51,7 @@ public class ChatService
         _mcpClient = await McpClientFactory.CreateAsync(CreateMcpTransport(clientFactory, accessToken), GetMcpOptions());
         await _kernel.ImportMcpClientFunctionsAsync(_mcpClient);
 
-        _promptingService = new PromptingSerivce(_kernel, autoInvoke: _mode == ApprovalMode.Elicitation);
+        _promptingService = new PromptingService(_kernel, autoInvoke: _mode == ApprovalMode.Elicitation);
         _initialized = true;
     }
 
@@ -78,7 +78,7 @@ public class ChatService
         return new SseClientTransport(new() { Endpoint = new Uri(httpMcpServerUrl), Name = "Secure Client" }, httpClient);
     }
 
-    private PromptingSerivce Handler => _promptingService ?? throw new InvalidOperationException("Service not initialized");
+    private PromptingService Handler => _promptingService ?? throw new InvalidOperationException("Service not initialized");
 
     public Task<ChatResponse> BeginChatAsync(string userKey, string prompt) => Handler.BeginAsync(userKey, prompt);
     public Task<ChatResponse> ApproveFunctionAsync(string userKey, string functionId) => Handler.ApproveAsync(userKey, functionId);
