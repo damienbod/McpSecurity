@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/libman",
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "microsoft-signalr@8.0.7",
+      "destination": "wwwroot/lib/signalr/dist/browser",
+      "files": [
+        "signalr.min.js",
+        "signalr.js"
+      ]
+    }
+  ]
+}
