@@ -15,8 +15,7 @@ public static class ElicitationHelper
             return toolExecution();
         }
 
-        var userAccepted = await mcpServer.ElicitAsync(GetElicitationParams(toolName));
-
+        var userAccepted = await mcpServer.ElicitAsync(GetApprovalParams(toolName));
         if (userAccepted.Action != "accept" || userAccepted.Content?["answer"].ValueKind != System.Text.Json.JsonValueKind.True)
         {
             throw new McpException("User declined to proceed");
@@ -25,17 +24,15 @@ public static class ElicitationHelper
         return toolExecution();
     }
 
-    public static RequestSchema GetElicitationSchema() => new RequestSchema()
-    {
-        Properties =
-        {
-            ["answer"] = new BooleanSchema()
-        },
-    };
-
-    public static ElicitRequestParams GetElicitationParams(string name) => new()
+    public static ElicitRequestParams GetApprovalParams(string name) => new()
     {
         Message = $"Do you want to execute tool '{name}'",
-        RequestedSchema = GetElicitationSchema(),
+        RequestedSchema = new RequestSchema()
+        {
+            Properties =
+            {
+                ["answer"] = new BooleanSchema()
+            },
+        },
     };
 }

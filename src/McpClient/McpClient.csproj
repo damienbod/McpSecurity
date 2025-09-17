@@ -33,4 +33,8 @@
     <PackageReference Include="Microsoft.Identity.Client" Version="4.77.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ClientLibrary\ClientLibrary.csproj" />
+  </ItemGroup>
+
 </Project>

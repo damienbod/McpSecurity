@@ -20,4 +20,8 @@
     
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ClientLibrary\ClientLibrary.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -10,7 +10,7 @@ env:
   AZURE_WEBAPP_PACKAGE_PATH: HttpMcpServer/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 9.0.x
-  WORKING_DIRECTORY: HttpMcpServer
+  WORKING_DIRECTORY: src/HttpMcpServer
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -1,10 +1,10 @@
-﻿using McpWebClient.AiServices;
+﻿using ClientLibrary;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.AiServices.Models;
 using Microsoft.SemanticKernel;
 using ModelContextProtocol.Client;
-using System.Net.Http.Headers;
 using ModelContextProtocol.Protocol;
+using System.Net.Http.Headers;
 
 namespace McpWebClient;
 
@@ -49,7 +49,7 @@ public class ChatService
         if (_initialized) return;
 
         _mcpClient = await McpClientFactory.CreateAsync(CreateMcpTransport(clientFactory, accessToken), GetMcpOptions());
-        await _kernel.ImportMcpClientFunctionsAsync(_mcpClient);
+        await _kernel.ImportMcpClientToolsAsync(_mcpClient);
 
         _promptingService = new PromptingService(_kernel, autoInvoke: _mode == ApprovalMode.Elicitation);
         _initialized = true;

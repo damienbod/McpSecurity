@@ -1,4 +1,4 @@
-using McpWebClient.AiServices;
+using ClientLibrary;
 using McpWebClient.AiServices.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;

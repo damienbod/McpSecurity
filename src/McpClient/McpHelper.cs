@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
+using ModelContextProtocol;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace MCPClient;
+namespace McpClient;
 
 public class McpHelper
 {
@@ -13,6 +14,18 @@ public class McpHelper
 
     // The MSAL Public client app
     private static IPublicClientApplication? application;
+
+    public static async Task<IClientTransport> CreateUnsecureMcpTransportAsync(HttpClient httpClient, IConfigurationRoot configuration)
+    {
+        var httpMcpServer = configuration["HttpMcpServerUrl"];
+        var transport = new SseClientTransport(new()
+        {
+            Endpoint = new Uri(httpMcpServer!),
+            Name = "MCP Desktop Client",
+        }, httpClient);
+
+        return transport;
+    }
 
     public static async Task<IClientTransport> CreateMcpTransportAsync(HttpClient httpClient, IConfigurationRoot configuration)
     {
@@ -66,7 +79,7 @@ public class McpHelper
        {
            ClientInfo = new()
            {
-               Name = "ElicitationClient",
+               Name = "McpDemoClient",
                Version = "1.0.0",
            },
            Capabilities = new()
@@ -75,15 +88,30 @@ public class McpHelper
                {
                    ElicitationHandler = HandleElicitationAsync,
                },
+               Sampling = new()
+               {
+                   SamplingHandler = HandleSamplingAsync,
+               }
            }
        };
 
-    public static async ValueTask<ElicitResult> HandleElicitationAsync(ElicitRequestParams? requestParams, CancellationToken token)
+    private static async ValueTask<CreateMessageResult> HandleSamplingAsync(CreateMessageRequestParams? requestParams, IProgress<ProgressNotificationValue> progress, CancellationToken token)
+    {
+        // do some LLM call here
+        return new CreateMessageResult()
+        {
+            Content = new TextContentBlock() { Text = Guid.NewGuid().ToString() },
+            Model = "sample-model",
+            Role = Role.Assistant,
+        };
+    }
+
+    public static ValueTask<ElicitResult> HandleElicitationAsync(ElicitRequestParams? requestParams, CancellationToken token)
     {
         // Bail out if the requestParams is null or if the requested schema has no properties
         if (requestParams?.RequestedSchema?.Properties == null)
         {
-            return new ElicitResult();
+            return ValueTask.FromResult(new ElicitResult());
         }
 
         // Process the elicitation request
@@ -101,10 +129,10 @@ public class McpHelper
         content["answer"] = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(userAllowance));
 
         // Return the user's input
-        return new ElicitResult
+        return ValueTask.FromResult(new ElicitResult
         {
             Action = "accept",
             Content = content
-        };
+        });
     }
 }
