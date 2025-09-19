@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolsLibrary", "ToolsLibrary\ToolsLibrary.csproj", "{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolsLibrary", "src\ToolsLibrary\ToolsLibrary.csproj", "{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpMcpServer", "HttpMcpServer\HttpMcpServer.csproj", "{FC243199-26D9-42CC-AB94-809A9570E273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpMcpServer", "src\HttpMcpServer\HttpMcpServer.csproj", "{FC243199-26D9-42CC-AB94-809A9570E273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPClient", "MCPClient\MCPClient.csproj", "{F734AB09-82A2-4167-860E-78053312AD96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McpClient", "src\MCPClient\McpClient.csproj", "{F734AB09-82A2-4167-860E-78053312AD96}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,7 +15,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McpWebClient", "McpWebClient\McpWebClient.csproj", "{B8486945-AED2-467E-9F02-C33C0B611F7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "McpWebClient", "src\McpWebClient\McpWebClient.csproj", "{B8486945-AED2-467E-9F02-C33C0B611F7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsecureHttpMcpServer", "src\UnsecureHttpMcpServer\UnsecureHttpMcpServer.csproj", "{53DEF5AC-574B-8FC2-1FC4-66D099831AC6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{421C59C1-3B8B-4A7F-9636-0BEDD1D56510}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientLibrary", "src\ClientLibrary\ClientLibrary.csproj", "{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +47,25 @@ Global
 		{B8486945-AED2-467E-9F02-C33C0B611F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8486945-AED2-467E-9F02-C33C0B611F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8486945-AED2-467E-9F02-C33C0B611F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53DEF5AC-574B-8FC2-1FC4-66D099831AC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53DEF5AC-574B-8FC2-1FC4-66D099831AC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53DEF5AC-574B-8FC2-1FC4-66D099831AC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53DEF5AC-574B-8FC2-1FC4-66D099831AC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3819E19D-7EB9-49CB-9E45-A25A3FEF4FF5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{FC243199-26D9-42CC-AB94-809A9570E273} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{F734AB09-82A2-4167-860E-78053312AD96} = {421C59C1-3B8B-4A7F-9636-0BEDD1D56510}
+		{B8486945-AED2-467E-9F02-C33C0B611F7B} = {421C59C1-3B8B-4A7F-9636-0BEDD1D56510}
+		{53DEF5AC-574B-8FC2-1FC4-66D099831AC6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD} = {421C59C1-3B8B-4A7F-9636-0BEDD1D56510}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8220C84B-2D85-4EF8-824C-DA43217D01F0}

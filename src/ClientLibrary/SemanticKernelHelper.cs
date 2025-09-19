@@ -5,12 +5,11 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
-namespace MCPClient;
+namespace ClientLibrary;
 public static class SemanticKernelHelper
 {
     public static OpenAIPromptExecutionSettings CreatePromptSettings(bool autoInvokeTools)
     {
-        // Enable automatic function calling
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         return new()
         {
@@ -18,7 +17,6 @@ public static class SemanticKernelHelper
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: autoInvokeTools, options: new() { RetainArgumentTypes = true })
         };
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
     }
 
     public static ChatHistory InitializeHistory(string prompt)
