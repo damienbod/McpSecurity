@@ -2,7 +2,7 @@
 
 Research MCP, OAuth, security, authorization
 
-## Setup Secure 
+## Setup context security
 
 ![Entra ID](https://github.com/damienbod/McpSecurity/blob/main/images/entraID_MCP.drawio.png)
 
