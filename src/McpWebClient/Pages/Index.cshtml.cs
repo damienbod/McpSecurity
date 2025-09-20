@@ -13,7 +13,6 @@ public class IndexModel : PageModel
     private readonly ILogger<IndexModel> _logger;
     private readonly ChatService _chatService;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly ITokenAcquisition _tokenAcquisition;
 
     [BindProperty]
     public string? PromptResults { get; set; }
@@ -34,7 +33,6 @@ public class IndexModel : PageModel
         ChatService llmPromptService)
     {
         _clientFactory = clientFactory;
-        _tokenAcquisition = tokenAcquisition;
         _logger = logger;
         _chatService = llmPromptService;
     }
@@ -58,11 +56,7 @@ public class IndexModel : PageModel
         }
 
         _chatService.SetMode(SelectedMode);
-
-        var accessToken = await _tokenAcquisition
-            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
-
-        await _chatService.EnsureSetupAsync(_clientFactory, accessToken);
+        await _chatService.EnsureSetupAsync(_clientFactory);
 
         // Begin a fresh chat with the prompt
         var response = await _chatService.BeginChatAsync(GetUserKey(), Prompt);
@@ -74,10 +68,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostApproveAsync(string functionId)
     {
         _chatService.SetMode(SelectedMode);
-        var accessToken = await _tokenAcquisition
-            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
-
-        await _chatService.EnsureSetupAsync(_clientFactory, accessToken);
+        await _chatService.EnsureSetupAsync(_clientFactory);
 
         var response = await _chatService.ApproveFunctionAsync(GetUserKey(), functionId);
 
@@ -89,10 +80,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostDeclineAsync(string functionId)
     {
         _chatService.SetMode(SelectedMode);
-        var accessToken = await _tokenAcquisition
-            .GetAccessTokenForUserAsync(["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"]);
-
-        await _chatService.EnsureSetupAsync(_clientFactory, accessToken);
+        await _chatService.EnsureSetupAsync(_clientFactory);
 
         var response = await _chatService.DeclineFunctionAsync(GetUserKey(), functionId);
 

@@ -1,6 +1,7 @@
 ﻿using ClientLibrary;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.AiServices.Models;
+using Microsoft.Identity.Web;
 using Microsoft.SemanticKernel;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -22,10 +23,11 @@ public class ChatService
     private IMcpClient _mcpClient = null!;
     private bool _initialized;
     private ApprovalMode _mode = ApprovalMode.Manual;
+    private readonly ITokenAcquisition _tokenAcquisition;
 
     private PromptingService? _promptingService;
 
-    public ChatService(IConfiguration configuration, ElicitationCoordinator elicitationCoordinator)
+    public ChatService(IConfiguration configuration, ElicitationCoordinator elicitationCoordinator,  ITokenAcquisition tokenAcquisition)
     {
         _configuration = configuration;
         _elicitationCoordinator = elicitationCoordinator;
@@ -33,6 +35,7 @@ public class ChatService
             .AddUserSecrets<Program>()
             .Build();
         _kernel = SemanticKernelHelper.GetKernel(config);
+        _tokenAcquisition = tokenAcquisition;
     }
 
     public void SetMode(ApprovalMode mode)
@@ -44,9 +47,12 @@ public class ChatService
         }
     }
 
-    public async Task EnsureSetupAsync(IHttpClientFactory clientFactory, string accessToken)
+    public async Task EnsureSetupAsync(IHttpClientFactory clientFactory)
     {
         if (_initialized) return;
+
+        var accessToken = await _tokenAcquisition
+            .GetAccessTokenForUserAsync([_configuration["McpScope"]! ]);
 
         _mcpClient = await McpClientFactory.CreateAsync(CreateMcpTransport(clientFactory, accessToken), GetMcpOptions());
         await _kernel.ImportMcpClientToolsAsync(_mcpClient);
