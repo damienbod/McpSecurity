@@ -17,7 +17,7 @@ builder.Services.AddAuthentication()
         ResourceName = "HttpMcpServer demo server",
         Resource = new Uri(httpMcpServerUrl!),
         AuthorizationServers = [ new Uri(authority) ],
-        ResourceDocumentation = new Uri("https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net/health"),
+        ResourceDocumentation = new Uri($"{httpMcpServerUrl}/health"),
         ScopesSupported = ["mcp:tools"],
     };
 });
