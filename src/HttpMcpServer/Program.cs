@@ -7,12 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
 var httpMcpServerUrl = builder.Configuration["HttpMcpServerUrl"];
 
+var authority = $"https://login.microsoftonline.com/{builder.Configuration["AzureAd:TenantId"]!}/v2.0";
+
 builder.Services.AddAuthentication()
 .AddMcp(options =>
 {
     options.ResourceMetadata = new()
     {
-        Resource = new Uri(httpMcpServerUrl),
+        ResourceName = "HttpMcpServer demo server",
+        Resource = new Uri(httpMcpServerUrl!),
+        AuthorizationServers = [ new Uri(authority) ],
         ResourceDocumentation = new Uri("https://mcpoauthsecurity-hag0drckepathyb6.westeurope-01.azurewebsites.net/health"),
         ScopesSupported = ["mcp:tools"],
     };
