@@ -1,8 +1,8 @@
+using McpWebClient.AiServices.Elicitation;
+using McpWebClient.Hubs;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using McpWebClient.Hubs;
-using McpWebClient.AiServices.Elicitation;
 
 namespace McpWebClient;
 
@@ -14,7 +14,7 @@ public class Program
 
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-            .EnableTokenAcquisitionToCallDownstreamApi([ builder.Configuration["McpScope"]!])
+            .EnableTokenAcquisitionToCallDownstreamApi([builder.Configuration["McpScope"]!])
             .AddInMemoryTokenCaches();
 
         builder.Services.AddAuthorization(options =>

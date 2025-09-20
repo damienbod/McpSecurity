@@ -27,7 +27,7 @@ public class ChatService
 
     private PromptingService? _promptingService;
 
-    public ChatService(IConfiguration configuration, ElicitationCoordinator elicitationCoordinator,  ITokenAcquisition tokenAcquisition)
+    public ChatService(IConfiguration configuration, ElicitationCoordinator elicitationCoordinator, ITokenAcquisition tokenAcquisition)
     {
         _configuration = configuration;
         _elicitationCoordinator = elicitationCoordinator;
@@ -52,7 +52,7 @@ public class ChatService
         if (_initialized) return;
 
         var accessToken = await _tokenAcquisition
-            .GetAccessTokenForUserAsync([_configuration["McpScope"]! ]);
+            .GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
 
         _mcpClient = await McpClientFactory.CreateAsync(CreateMcpTransport(clientFactory, accessToken), GetMcpOptions());
         await _kernel.ImportMcpClientToolsAsync(_mcpClient);

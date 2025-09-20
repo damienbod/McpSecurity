@@ -16,9 +16,9 @@ builder.Services.AddAuthentication()
     {
         ResourceName = "HttpMcpServer demo server",
         Resource = new Uri(httpMcpServerUrl!),
-        AuthorizationServers = [ new Uri(authority) ],
+        AuthorizationServers = [new Uri(authority)],
         ResourceDocumentation = new Uri($"{httpMcpServerUrl}/health"),
-        ScopesSupported = [ builder.Configuration["McpScope"] ],
+        ScopesSupported = [builder.Configuration["McpScope"]],
     };
 });
 
