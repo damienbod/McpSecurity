@@ -2,6 +2,10 @@
 
 Research MCP, OAuth, security, authorization
 
+## Setup Secure 
+
+![Entra ID](https://github.com/damienbod/McpSecurity/blob/main/images/entraID_MCP.drawio.png)
+
 ## Definitions
 
 - MCP: a standard integration layer for accessing tools
