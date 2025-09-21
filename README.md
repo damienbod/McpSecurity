@@ -6,6 +6,10 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 
 ![Entra ID](https://github.com/damienbod/McpSecurity/blob/main/images/entraID_MCP.drawio.png)
 
+## Blogs
+
+- [Implement a secure MCP server using OAuth and Entra ID](https://damienbod.com)
+
 ## Definitions
 
 - MCP: a standard integration layer for accessing tools
