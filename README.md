@@ -139,7 +139,7 @@ https://docs.github.com/en/copilot/how-tos/custom-instructions/adding-repository
 
 https://github.com/dotnet/docs-aspire/blob/main/.github/copilot-instructions.md
 
-## Azure Open AI 
+## Azure OpenAI 
 
 https://learn.microsoft.com/en-us/azure/ai-foundry/
 
