@@ -1,6 +1,6 @@
 # MCP Security
 
-Research MCP, OAuth, security, authorization
+Model context protocol (MCP) OAuth, security, authorization, authentication flows
 
 ## Setup context security
 
