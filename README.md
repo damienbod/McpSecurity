@@ -10,6 +10,10 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 
 - [Implement a secure MCP server using OAuth and Entra ID](https://damienbod.com)
 
+## Presentation
+- [AI Community Day Zurich - How to securely implement MCP with OAuth in .NET](./slides/AI-community-day-zurich-sept-25/MCP-Security-2025.pdf)
+ 
+
 ## Definitions
 
 - MCP: a standard integration layer for accessing tools

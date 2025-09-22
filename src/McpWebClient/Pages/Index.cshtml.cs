@@ -19,7 +19,7 @@ public class IndexModel : PageModel
 
     [BindProperty]
     [Required]
-    public string Prompt { get; set; } = "Please generate a random number with the range of -10 and 10";
+    public string Prompt { get; set; } = "Please generate a random number based from the current date";
 
     [BindProperty]
     [Required]
