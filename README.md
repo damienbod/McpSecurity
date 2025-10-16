@@ -9,6 +9,7 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 ## Blogs
 
 - [Implement a secure MCP server using OAuth and Entra ID](https://damienbod.com/2025/09/23/implement-a-secure-mcp-server-using-oauth-and-entra-id/)
+- [Implement a secure MCP OAuth desktop client using OAuth and Entra ID](https://damienbod.com/2025/10/16/implement-a-secure-mcp-oauth-desktop-client-using-oauth-and-entra-id/)
 
 ## Presentation
 - [AI Community Day Zurich - How to securely implement MCP with OAuth in .NET](./slides/AI-community-day-zurich-sept-25/MCP-Security-2025.pdf)
