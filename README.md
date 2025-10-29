@@ -11,6 +11,7 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 - [Implement a secure MCP server using OAuth and Entra ID](https://damienbod.com/2025/09/23/implement-a-secure-mcp-server-using-oauth-and-entra-id/)
 - [Implement a secure MCP OAuth desktop client using OAuth and Entra ID](https://damienbod.com/2025/10/16/implement-a-secure-mcp-oauth-desktop-client-using-oauth-and-entra-id/)
 - [Model Context Protocol in :NET](https://medium.com/@cedric.mendelin/model-context-protocol-in-net-06c6076b6385)
+- [Developing an MCP Scenario with TypeScript: A production-ready reference implementation, Tobias Maestrini](https://tmaestrini.github.io/topics/developing-an-mcp-scenario-with-typescript-a-production-ready-reference-implementation)
 
 ## Presentation
 - [AI Community Day Zurich - How to securely implement MCP with OAuth in .NET](./slides/AI-community-day-zurich-sept-25/MCP-Security-2025.pdf)
