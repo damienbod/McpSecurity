@@ -50,9 +50,9 @@ public static class ChatClientHelper
     /// </summary>
     public static IChatClient GetChatClient(IConfigurationRoot config)
     {
-        var endpoint = config["OpenAI:Endpoint"] ?? throw new ArgumentNullException("OpenAI:Endpoint configuration is missing");
-        var apiKey = config["OpenAI:ApiKey"] ?? throw new ArgumentNullException("OpenAI:ApiKey configuration is missing");
-        var modelId = config["OpenAI:ModelId"] ?? throw new ArgumentNullException("OpenAI:ModelId configuration is missing");
+        var endpoint = config["OpenAI:Endpoint"] ?? throw new InvalidOperationException("OpenAI:Endpoint configuration is missing");
+        var apiKey = config["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI:ApiKey configuration is missing");
+        var modelId = config["OpenAI:ModelId"] ?? throw new InvalidOperationException("OpenAI:ModelId configuration is missing");
 
         var azureClient = new AzureOpenAIClient(
             new Uri(endpoint),
