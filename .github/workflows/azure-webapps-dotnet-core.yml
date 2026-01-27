@@ -4,9 +4,9 @@ name: Build and deploy MCP Server
 on:
   push:
     branches:
-    - deploy-mcp-server
+    - deploy-mcp-server-cedric
 env:
-  AZURE_WEBAPP_NAME: mcpoauthsecurity
+  AZURE_WEBAPP_NAME: mvp-playground-mcp
   AZURE_WEBAPP_PACKAGE_PATH: HttpMcpServer/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 10.0.x
@@ -42,12 +42,6 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    - name: Deploy to Azure WebApp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: mvp-playground-mcp
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_CEDRIC }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
