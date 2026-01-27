@@ -1,7 +1,7 @@
 ﻿using ClientLibrary;
 using McpClient;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
-using Microsoft.SemanticKernel.ChatCompletion;
 using ModelContextProtocol.Client;
 
 // load configuration from app secrets
@@ -15,11 +15,10 @@ var config = new ConfigurationBuilder()
 var useMcpElicitation = false;
 var useSecureTransport = false;
 
-// Prepare and build kernel
-var kernel = SemanticKernelHelper.GetKernel(config);
+// Create base chat client
+var baseChatClient = ChatClientHelper.GetChatClient(config);
 
 // initialize MCP client
-
 using var httpClient = new HttpClient();
 
 // secure transport with authentication
@@ -29,25 +28,28 @@ var transport = useSecureTransport
 
 await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport, McpHelper.CreateMcpClientOptions());
 
-// import the mcp tools
-await kernel.ImportMcpClientToolsAsync(mcpClient);
+// Get MCP tools as AIFunctions
+var mcpTools = await mcpClient.GetMcpToolsAsAIFunctionsAsync();
 
-// Prepare execution
-var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: useMcpElicitation);
+// Create chat client with function invocation if using elicitation (auto-invoke)
+IChatClient chatClient = useMcpElicitation
+    ? new ChatClientBuilder(baseChatClient).UseFunctionInvocation().Build()
+    : baseChatClient;
+
+// Prepare chat options with tools
+var chatOptions = ChatClientHelper.CreateChatOptions(mcpTools.Cast<AITool>(), autoInvokeTools: useMcpElicitation);
 
 var prompt = "Please generate a random string";
-var chatHistory = SemanticKernelHelper.InitializeHistory(prompt);
+var chatHistory = ChatClientHelper.InitializeHistory(prompt);
 Console.WriteLine($"User: {prompt}");
 
+// Execute prompt
+var response = await chatClient.GetResponseAsync(chatHistory, chatOptions);
 
-// execute prompt
-var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-var messageContent = await chatCompletionService.GetChatMessageContentAsync(chatHistory, executionSettings, kernel);
-
-// New way of accessing function calls using connector agnostic function calling model classes.
+// Process function calls if not using auto-invoke (elicitation)
 if (!useMcpElicitation)
 {
-    messageContent = await FunctionCallHelper.ProcessFunctionCalls(kernel, executionSettings, chatHistory, chatCompletionService, messageContent);
+    response = await FunctionCallHelper.ProcessFunctionCalls(chatClient, chatOptions, chatHistory, response, mcpTools);
 }
 
-Console.WriteLine($"AI response: {messageContent.Content}");
+Console.WriteLine($"AI response: {response.Text}");
