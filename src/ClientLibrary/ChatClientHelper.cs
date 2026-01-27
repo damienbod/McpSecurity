@@ -31,7 +31,7 @@ public static class ChatClientHelper
             }
 
             // Set tool mode - Auto means the model decides when to call tools
-            options.ToolMode = autoInvokeTools ? ChatToolMode.Auto : ChatToolMode.Auto;
+            options.ToolMode = autoInvokeTools ? ChatToolMode.Auto : ChatToolMode.RequireAny;
         }
 
         return options;
