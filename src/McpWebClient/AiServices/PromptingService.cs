@@ -1,7 +1,6 @@
 using ClientLibrary;
 using McpWebClient.AiServices.Models;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.Extensions.AI;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
@@ -9,88 +8,114 @@ namespace McpWebClient;
 
 internal partial class PromptingService
 {
-    private readonly Kernel _kernel;
+    private readonly IChatClient _chatClient;
+    private readonly IList<AIFunction> _mcpTools;
     private readonly bool _autoInvoke;
 
     private static readonly ConcurrentDictionary<string, ChatSession> _sessions = new();
 
-    public PromptingService(Kernel kernel, bool autoInvoke)
+    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools, bool autoInvoke)
     {
-        _kernel = kernel;
+        _chatClient = chatClient;
+        _mcpTools = mcpTools;
         _autoInvoke = autoInvoke;
     }
 
-    public async Task<ChatResponse> BeginAsync(string userKey, string prompt)
+    public async Task<PromptResponse> BeginAsync(string userKey, string prompt)
     {
         var session = _sessions[userKey] = new() { LastUpdatedUtc = DateTime.UtcNow };
-        session.History.AddUserMessage(prompt);
+        session.History.Add(new ChatMessage(ChatRole.User, prompt));
 
-        var messageContent = await ExecutePrompt(session);
+        var response = await ExecutePrompt(session);
+        var lastMessage = response.Messages.LastOrDefault();
 
-        var functionCalls = FunctionCallContent.GetFunctionCalls(messageContent).ToArray();
+        var functionCalls = lastMessage?.Contents
+            .OfType<FunctionCallContent>()
+            .ToArray() ?? [];
 
-        return ExtractFunctionsAndSyncSession(session, messageContent, functionCalls);
+        return ExtractFunctionsAndSyncSession(session, lastMessage, functionCalls);
     }
 
-    private static ChatResponse ExtractFunctionsAndSyncSession(ChatSession session, ChatMessageContent messageContent, FunctionCallContent[] functionCalls)
+    private static PromptResponse ExtractFunctionsAndSyncSession(ChatSession session, ChatMessage? lastMessage, FunctionCallContent[] functionCalls)
     {
-        if (functionCalls.Length > 0)
+        if (functionCalls.Length > 0 && lastMessage != null)
         {
-            session.History.Add(messageContent);
+            session.History.Add(lastMessage);
             foreach (var call in functionCalls)
             {
-                session.PendingCalls[call.Id] = call;
+                session.PendingCalls[call.CallId] = call;
             }
             session.LastUpdatedUtc = DateTime.UtcNow;
-            return new ChatResponse(null, Project(session));
+            return new PromptResponse(null, Project(session));
         }
 
-        session.FinalAnswer = messageContent.Content;
+        session.FinalAnswer = lastMessage?.Text;
         session.LastUpdatedUtc = DateTime.UtcNow;
-        return new ChatResponse(session.FinalAnswer, new());
+        return new PromptResponse(session.FinalAnswer, new());
     }
 
-    private async Task<ChatMessageContent> ExecutePrompt(ChatSession session)
+    private async Task<Microsoft.Extensions.AI.ChatResponse> ExecutePrompt(ChatSession session)
     {
-        var executionSettings = SemanticKernelHelper.CreatePromptSettings(autoInvokeTools: _autoInvoke);
-        var chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
-
-        var messageContent = await chatCompletionService.GetChatMessageContentAsync(session.History, executionSettings, _kernel);
-        return messageContent;
+        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>(), autoInvokeTools: _autoInvoke);
+        var response = await _chatClient.GetResponseAsync(session.History, chatOptions);
+        return response;
     }
 
-    public async Task<ChatResponse> ApproveAsync(string userKey, string functionId)
+    public async Task<PromptResponse> ApproveAsync(string userKey, string functionId)
     {
         if (!_sessions.TryGetValue(userKey, out var session))
         {
-            return new ChatResponse("Session not found. Please start again.", new());
+            return new PromptResponse("Session not found. Please start again.", new());
         }
 
         if (!session.PendingCalls.TryGetValue(functionId, out var functionCall))
         {
-            return new ChatResponse(session.FinalAnswer, Project(session));
+            return new PromptResponse(session.FinalAnswer, Project(session));
         }
 
-        var result = await functionCall.InvokeAsync(_kernel);
-        session.History.Add(result.ToChatMessage());
+        // Find and invoke the function
+        var tool = _mcpTools.FirstOrDefault(t => t.Name == functionCall.Name);
+        if (tool != null)
+        {
+            try
+            {
+                // Create AIFunctionArguments from the dictionary
+                var aiArgs = functionCall.Arguments != null
+                    ? new AIFunctionArguments(functionCall.Arguments)
+                    : null;
+                var result = await tool.InvokeAsync(aiArgs);
+                var resultString = result?.ToString() ?? "null";
+                var resultContent = new FunctionResultContent(functionCall.CallId, resultString);
+                session.History.Add(new ChatMessage(ChatRole.Tool, [resultContent]));
+            }
+            catch (Exception ex)
+            {
+                var errorContent = new FunctionResultContent(functionCall.CallId, $"Error: {ex.Message}");
+                session.History.Add(new ChatMessage(ChatRole.Tool, [errorContent]));
+            }
+        }
+
         session.PendingCalls.Remove(functionId);
 
         if (session.PendingCalls.Count > 0)
         {
-            return new ChatResponse(null, Project(session));
+            return new PromptResponse(null, Project(session));
         }
 
+        var response = await ExecutePrompt(session);
+        var lastMessage = response.Messages.LastOrDefault();
 
-        var messageContent = await ExecutePrompt(session);
+        var moreCalls = lastMessage?.Contents
+            .OfType<FunctionCallContent>()
+            .ToArray() ?? [];
 
-        var moreCalls = FunctionCallContent.GetFunctionCalls(messageContent).ToArray();
-        return ExtractFunctionsAndSyncSession(session, messageContent, moreCalls);
+        return ExtractFunctionsAndSyncSession(session, lastMessage, moreCalls);
     }
 
-    public Task<ChatResponse> DeclineAsync(string userKey, string functionId)
+    public Task<PromptResponse> DeclineAsync(string userKey, string functionId)
     {
         Clear(userKey);
-        return Task.FromResult(new ChatResponse("Conversation terminated by user.", new()));
+        return Task.FromResult(new PromptResponse("Conversation terminated by user.", new()));
     }
 
     private void Clear(string userKey) => _sessions.TryRemove(userKey, out _);
@@ -106,7 +131,7 @@ internal partial class PromptingService
                 args = function.Arguments is null ? "{}" : JsonSerializer.Serialize(function.Arguments, new JsonSerializerOptions { WriteIndented = true });
             }
             catch { args = function.Arguments?.ToString() ?? string.Empty; }
-            list.Add(new PendingFunctionCall(function.Id, function.FunctionName, function.PluginName, args));
+            list.Add(new PendingFunctionCall(function.CallId, function.Name, null, args));
         }
         return list;
     }

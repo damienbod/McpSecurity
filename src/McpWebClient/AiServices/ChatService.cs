@@ -1,8 +1,8 @@
 ﻿using ClientLibrary;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.AiServices.Models;
+using Microsoft.Extensions.AI;
 using Microsoft.Identity.Web;
-using Microsoft.SemanticKernel;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 using System.Net.Http.Headers;
@@ -19,7 +19,8 @@ public class ChatService
 {
     private readonly IConfiguration _configuration;
     private readonly ElicitationCoordinator _elicitationCoordinator;
-    private Kernel _kernel;
+    private IChatClient _chatClient;
+    private IList<AIFunction> _mcpTools = [];
     private IMcpClient _mcpClient = null!;
     private bool _initialized;
     private ApprovalMode _mode = ApprovalMode.Manual;
@@ -34,7 +35,7 @@ public class ChatService
         var config = new ConfigurationBuilder()
             .AddUserSecrets<Program>()
             .Build();
-        _kernel = SemanticKernelHelper.GetKernel(config);
+        _chatClient = ChatClientHelper.GetChatClient(config);
         _tokenAcquisition = tokenAcquisition;
     }
 
@@ -55,9 +56,15 @@ public class ChatService
             .GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
 
         _mcpClient = await McpClientFactory.CreateAsync(CreateMcpTransport(clientFactory, accessToken), GetMcpOptions());
-        await _kernel.ImportMcpClientToolsAsync(_mcpClient);
+        _mcpTools = await _mcpClient.GetMcpToolsAsAIFunctionsAsync();
 
-        _promptingService = new PromptingService(_kernel, autoInvoke: _mode == ApprovalMode.Elicitation);
+        // Wrap chat client with function invocation if using elicitation (auto-invoke)
+        if (_mode == ApprovalMode.Elicitation)
+        {
+            _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
+        }
+
+        _promptingService = new PromptingService(_chatClient, _mcpTools, autoInvoke: _mode == ApprovalMode.Elicitation);
         _initialized = true;
     }
 
@@ -86,7 +93,7 @@ public class ChatService
 
     private PromptingService Handler => _promptingService ?? throw new InvalidOperationException("Service not initialized");
 
-    public Task<ChatResponse> BeginChatAsync(string userKey, string prompt) => Handler.BeginAsync(userKey, prompt);
-    public Task<ChatResponse> ApproveFunctionAsync(string userKey, string functionId) => Handler.ApproveAsync(userKey, functionId);
-    public Task<ChatResponse> DeclineFunctionAsync(string userKey, string functionId) => Handler.DeclineAsync(userKey, functionId);
+    public Task<PromptResponse> BeginChatAsync(string userKey, string prompt) => Handler.BeginAsync(userKey, prompt);
+    public Task<PromptResponse> ApproveFunctionAsync(string userKey, string functionId) => Handler.ApproveAsync(userKey, functionId);
+    public Task<PromptResponse> DeclineFunctionAsync(string userKey, string functionId) => Handler.DeclineAsync(userKey, functionId);
 }
