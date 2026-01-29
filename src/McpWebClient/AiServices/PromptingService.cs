@@ -1,8 +1,8 @@
+using System.Collections.Concurrent;
+using System.Text.Json;
 using ClientLibrary;
 using McpWebClient.AiServices.Models;
 using Microsoft.Extensions.AI;
-using System.Collections.Concurrent;
-using System.Text.Json;
 
 namespace McpWebClient;
 
@@ -10,15 +10,13 @@ internal partial class PromptingService
 {
     private readonly IChatClient _chatClient;
     private readonly IList<AIFunction> _mcpTools;
-    private readonly bool _autoInvoke;
 
     private static readonly ConcurrentDictionary<string, ChatSession> _sessions = new();
 
-    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools, bool autoInvoke)
+    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools)
     {
         _chatClient = chatClient;
         _mcpTools = mcpTools;
-        _autoInvoke = autoInvoke;
     }
 
     public async Task<PromptResponse> BeginAsync(string userKey, string prompt)
@@ -56,7 +54,7 @@ internal partial class PromptingService
 
     private async Task<Microsoft.Extensions.AI.ChatResponse> ExecutePrompt(ChatSession session)
     {
-        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>(), autoInvokeTools: _autoInvoke);
+        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>());
         var response = await _chatClient.GetResponseAsync(session.History, chatOptions);
         return response;
     }

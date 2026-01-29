@@ -1,11 +1,11 @@
-﻿using ClientLibrary;
+﻿using System.Net.Http.Headers;
+using ClientLibrary;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.AiServices.Models;
 using Microsoft.Extensions.AI;
 using Microsoft.Identity.Web;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
-using System.Net.Http.Headers;
 
 namespace McpWebClient;
 
@@ -64,7 +64,7 @@ public class ChatService
             _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
         }
 
-        _promptingService = new PromptingService(_chatClient, _mcpTools, autoInvoke: _mode == ApprovalMode.Elicitation);
+        _promptingService = new PromptingService(_chatClient, _mcpTools);
         _initialized = true;
     }
 

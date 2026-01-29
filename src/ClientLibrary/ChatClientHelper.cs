@@ -1,7 +1,7 @@
-﻿using Azure.AI.OpenAI;
+﻿using System.ClientModel;
+using Azure.AI.OpenAI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
-using System.ClientModel;
 
 namespace ClientLibrary;
 
@@ -15,7 +15,7 @@ public static class ChatClientHelper
     /// </summary>
     /// <param name="tools">Optional tools/functions to make available</param>
     /// <param name="autoInvokeTools">Whether to auto-invoke tools or return them for manual processing</param>
-    public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null, bool autoInvokeTools = false)
+    public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null)
     {
         var options = new ChatOptions
         {
@@ -31,7 +31,8 @@ public static class ChatClientHelper
             }
 
             // Set tool mode - Auto means the model decides when to call tools
-            options.ToolMode = autoInvokeTools ? ChatToolMode.Auto : ChatToolMode.RequireAny;
+            options.ToolMode = ChatToolMode.Auto;
+
         }
 
         return options;
@@ -71,7 +72,7 @@ public static class ChatClientHelper
         var baseClient = GetChatClient(config);
 
         var builder = new ChatClientBuilder(baseClient);
-        
+
         if (functions != null)
         {
             builder.UseFunctionInvocation();

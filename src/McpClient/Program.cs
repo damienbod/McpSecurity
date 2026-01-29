@@ -37,7 +37,7 @@ IChatClient chatClient = useMcpElicitation
     : baseChatClient;
 
 // Prepare chat options with tools
-var chatOptions = ChatClientHelper.CreateChatOptions(mcpTools.Cast<AITool>(), autoInvokeTools: useMcpElicitation);
+var chatOptions = ChatClientHelper.CreateChatOptions(mcpTools.Cast<AITool>());
 
 var prompt = "Please generate a random string";
 var chatHistory = ChatClientHelper.InitializeHistory(prompt);
