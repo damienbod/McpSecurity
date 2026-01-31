@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace McpClient;
 
@@ -30,7 +30,7 @@ public class McpHelper
     public static async Task<IClientTransport> CreateMcpTransportAsync(HttpClient httpClient, IConfigurationRoot configuration)
     {
         appConfiguration = configuration.Get<PublicClientApplicationOptions>();
-        string[] scopes = ["api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/mcp:tools"];
+        string[] scopes = [configuration["McpScope"]!];
 
         // Sign-in user using MSAL and obtain an access token for MS Graph
         var accessToken = await SignInUserAndGetTokenUsingMSAL(appConfiguration!, scopes);

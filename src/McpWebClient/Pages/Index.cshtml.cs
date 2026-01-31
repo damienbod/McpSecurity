@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace McpWebClient.Pages;
 
-[AuthorizeForScopes(ScopeKeySection = "api://96b0f495-3b65-4c8f-a0c6-c3767c3365ed/access_as_user")]
+[AuthorizeForScopes(ScopeKeySection = "McpScope")]
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
@@ -23,7 +23,7 @@ public class IndexModel : PageModel
 
     [BindProperty]
     [Required]
-    public ApprovalMode SelectedMode { get; set; } = ApprovalMode.Manual;
+    public ApprovalMode SelectedMode { get; set; } = ApprovalMode.Auto;
 
     public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
 

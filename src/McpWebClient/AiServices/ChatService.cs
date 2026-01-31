@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 using ClientLibrary;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.AiServices.Models;
@@ -11,7 +12,11 @@ namespace McpWebClient;
 
 public enum ApprovalMode
 {
+    [Display(Name = "Auto (no human approval)")]
+    Auto,
+    [Display(Name = "Manual Approval")]
     Manual,
+    [Display(Name = "Elicitation Approval")]
     Elicitation
 }
 
@@ -23,7 +28,7 @@ public class ChatService
     private IList<AIFunction> _mcpTools = [];
     private IMcpClient _mcpClient = null!;
     private bool _initialized;
-    private ApprovalMode _mode = ApprovalMode.Manual;
+    private ApprovalMode _mode = ApprovalMode.Auto;
     private readonly ITokenAcquisition _tokenAcquisition;
 
     private PromptingService? _promptingService;
@@ -58,8 +63,8 @@ public class ChatService
         _mcpClient = await McpClientFactory.CreateAsync(CreateMcpTransport(clientFactory, accessToken), GetMcpOptions());
         _mcpTools = await _mcpClient.GetMcpToolsAsAIFunctionsAsync();
 
-        // Wrap chat client with function invocation if using elicitation (auto-invoke)
-        if (_mode == ApprovalMode.Elicitation)
+        // Wrap chat client with function invocation if using elicitation or auto mode (auto-invoke)
+        if (_mode == ApprovalMode.Elicitation || _mode == ApprovalMode.Auto)
         {
             _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
         }
