@@ -37,9 +37,12 @@ public class ChatService
     {
         _configuration = configuration;
         _elicitationCoordinator = elicitationCoordinator;
+
         var config = new ConfigurationBuilder()
             .AddUserSecrets<Program>()
+            .AddEnvironmentVariables()
             .Build();
+
         _chatClient = ChatClientHelper.GetChatClient(config);
         _tokenAcquisition = tokenAcquisition;
     }
