@@ -21,7 +21,7 @@ public class Program
         var clientSecret = builder.Configuration["AzureAd:ClientSecret"];
         Console.WriteLine($"ClientSecret is set: {!string.IsNullOrEmpty(clientSecret)}");
 
-        var endpoint = builder.Configuration["OpenAI:Endpooint"];
+        var endpoint = builder.Configuration["OpenAI:Endpoint"];
         Console.WriteLine($"Endpoint is set: {!string.IsNullOrEmpty(endpoint)}");
 
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
