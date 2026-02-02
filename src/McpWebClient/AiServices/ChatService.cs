@@ -20,6 +20,16 @@ public enum ApprovalMode
     Elicitation
 }
 
+public enum FunctionCallingMode
+{
+    [Display(Name = "Local Function Calling")]
+    Local,
+    [Display(Name = "Unauthenticated MCP")]
+    McpUnsecure,
+    [Display(Name = "Confidential OIDC MCP")]
+    McpSecure
+}
+
 public class ChatService
 {
     private readonly IConfiguration _configuration;
@@ -28,7 +38,8 @@ public class ChatService
     private IList<AIFunction> _mcpTools = [];
     private IMcpClient _mcpClient = null!;
     private bool _initialized;
-    private ApprovalMode _mode = ApprovalMode.Auto;
+    private ApprovalMode _approvalMode = ApprovalMode.Auto;
+    private FunctionCallingMode _functionCallingMode = FunctionCallingMode.Local;
     private readonly ITokenAcquisition _tokenAcquisition;
 
     private PromptingService? _promptingService;
@@ -44,12 +55,21 @@ public class ChatService
         _tokenAcquisition = tokenAcquisition;
     }
 
-    public void SetMode(ApprovalMode mode)
+    public void SetApprovalMode(ApprovalMode mode)
     {
-        if (_mode != mode)
+        if (_approvalMode != mode)
         {
             _initialized = false;
-            _mode = mode;
+            _approvalMode = mode;
+        }
+    }
+
+    public void SetFunctionCallingMode(FunctionCallingMode mode)
+    {
+        if (_functionCallingMode != mode)
+        {
+            _initialized = false;
+            _functionCallingMode = mode;
         }
     }
 
@@ -64,7 +84,7 @@ public class ChatService
         _mcpTools = await _mcpClient.GetMcpToolsAsAIFunctionsAsync();
 
         // Wrap chat client with function invocation if using elicitation or auto mode (auto-invoke)
-        if (_mode == ApprovalMode.Elicitation || _mode == ApprovalMode.Auto)
+        if (_approvalMode == ApprovalMode.Elicitation || _approvalMode == ApprovalMode.Auto)
         {
             _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
         }
@@ -75,7 +95,7 @@ public class ChatService
 
     private McpClientOptions? GetMcpOptions()
     {
-        return _mode == ApprovalMode.Elicitation ? new McpClientOptions
+        return _approvalMode == ApprovalMode.Elicitation ? new McpClientOptions
         {
             ClientInfo = new() { Name = "WebElicitationClient", Version = "1.0.0" },
             Capabilities = new() { Elicitation = new() { ElicitationHandler = HandleElicitationAsync } }

@@ -1,9 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using McpWebClient.AiServices.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Web;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace McpWebClient.Pages;
 
@@ -20,6 +20,10 @@ public class IndexModel : PageModel
     [BindProperty]
     [Required]
     public string Prompt { get; set; } = "Please generate a random number based from the current date";
+
+    [BindProperty]
+    [Required]
+    public FunctionCallingMode SelectedFunctionCallingMode { get; set; } = FunctionCallingMode.Local;
 
     [BindProperty]
     [Required]
@@ -55,35 +59,41 @@ public class IndexModel : PageModel
             return OnGet();
         }
 
-        _chatService.SetMode(SelectedMode);
-        await _chatService.EnsureSetupAsync(_clientFactory);
+        await EnsureChatServiceSetupAsync();
 
         // Begin a fresh chat with the prompt
         var response = await _chatService.BeginChatAsync(GetUserKey(), Prompt);
-        PromptResults = response.FinalAnswer;
-        PendingFunctions = response.PendingFunctions;
-        return Page();
+
+        return await GetActionResultFromResponseAsync(response);
     }
 
     public async Task<IActionResult> OnPostApproveAsync(string functionId)
     {
-        _chatService.SetMode(SelectedMode);
-        await _chatService.EnsureSetupAsync(_clientFactory);
+        await EnsureChatServiceSetupAsync();
 
         var response = await _chatService.ApproveFunctionAsync(GetUserKey(), functionId);
 
-        PromptResults = response.FinalAnswer;
-        PendingFunctions = response.PendingFunctions;
-        return Page();
+        return await GetActionResultFromResponseAsync(response);
     }
 
     public async Task<IActionResult> OnPostDeclineAsync(string functionId)
     {
-        _chatService.SetMode(SelectedMode);
-        await _chatService.EnsureSetupAsync(_clientFactory);
+        await EnsureChatServiceSetupAsync();
 
         var response = await _chatService.DeclineFunctionAsync(GetUserKey(), functionId);
 
+        return await GetActionResultFromResponseAsync(response);
+    }
+
+    private async Task EnsureChatServiceSetupAsync()
+    {
+        _chatService.SetApprovalMode(SelectedMode);
+        _chatService.SetFunctionCallingMode(SelectedFunctionCallingMode);
+        await _chatService.EnsureSetupAsync(_clientFactory);
+    }
+
+    private async Task<IActionResult> GetActionResultFromResponseAsync(PromptResponse response)
+    {
         PromptResults = response.FinalAnswer;
         PendingFunctions = response.PendingFunctions;
         return Page();

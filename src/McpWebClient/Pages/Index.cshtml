@@ -7,6 +7,12 @@
 <!-- Explicit asp-page to avoid inheriting any existing ?handler=Approve query when reusing page URL -->
 <form method="post" asp-page="Index">
     <div class="mb-3">
+        <label class="form-label" for="SelectedFunctionCallingMode">Function Calling Mode:</label>
+        <select class="form-select" id="SelectedFunctionCallingMode" name="SelectedFunctionCallingMode" asp-for="SelectedFunctionCallingMode" asp-items="Html.GetEnumSelectList<FunctionCallingMode>()"></select>
+        <span asp-validation-for="SelectedFunctionCallingMode" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
         <label class="form-label" for="SelectedMode">Approval Mode:</label>
         <select class="form-select" id="SelectedMode" name="SelectedMode" asp-for="SelectedMode" asp-items="Html.GetEnumSelectList<ApprovalMode>()"></select>
         <span asp-validation-for="SelectedMode" class="text-danger"></span>
