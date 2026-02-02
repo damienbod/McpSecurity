@@ -12,8 +12,9 @@ var config = new ConfigurationBuilder()
     .Build();
 
 // human-in-the-loop for function calling approval
+var applyHumanInTheLoop = false;
 var useMcpElicitation = false;
-var useSecureTransport = false;
+var useSecureTransport = true;
 
 // Create base chat client
 var baseChatClient = ChatClientHelper.GetChatClient(config);
@@ -26,20 +27,23 @@ var transport = useSecureTransport
    ? await McpHelper.CreateMcpTransportAsync(httpClient, config)
    : await McpHelper.CreateUnsecureMcpTransportAsync(httpClient, config);
 
-await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport, McpHelper.CreateMcpClientOptions());
+await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport, useMcpElicitation ? McpHelper.CreateMcpClientOptions() : new());
 
 // Get MCP tools as AIFunctions
 var mcpTools = await mcpClient.GetMcpToolsAsAIFunctionsAsync();
 
 // Create chat client with function invocation if using elicitation (auto-invoke)
-IChatClient chatClient = useMcpElicitation
+IChatClient chatClient = useMcpElicitation || !applyHumanInTheLoop
     ? new ChatClientBuilder(baseChatClient).UseFunctionInvocation().Build()
     : baseChatClient;
 
 // Prepare chat options with tools
 var chatOptions = ChatClientHelper.CreateChatOptions(mcpTools.Cast<AITool>());
 
-var prompt = "Please generate a random string";
+var prompt = "Please generate a random number";
+//var prompt = "Please generate a random number based on the current date.";
+//var prompt = "Please generate a random string";
+
 var chatHistory = ChatClientHelper.InitializeHistory(prompt);
 Console.WriteLine($"User: {prompt}");
 
@@ -47,7 +51,7 @@ Console.WriteLine($"User: {prompt}");
 var response = await chatClient.GetResponseAsync(chatHistory, chatOptions);
 
 // Process function calls if not using auto-invoke (elicitation)
-if (!useMcpElicitation)
+if (!useMcpElicitation && applyHumanInTheLoop)
 {
     response = await FunctionCallHelper.ProcessFunctionCalls(chatClient, chatOptions, chatHistory, response, mcpTools);
 }

@@ -17,13 +17,6 @@ public class Program
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
             .AddEnvironmentVariables();
 
-        // Temporary debug - remove after testing!
-        var clientSecret = builder.Configuration["AzureAd:ClientSecret"];
-        Console.WriteLine($"ClientSecret is set: {!string.IsNullOrEmpty(clientSecret)}");
-
-        var endpoint = builder.Configuration["OpenAI:Endpoint"];
-        Console.WriteLine($"Endpoint is set: {!string.IsNullOrEmpty(endpoint)}");
-
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
             .EnableTokenAcquisitionToCallDownstreamApi([builder.Configuration["McpScope"]!])
