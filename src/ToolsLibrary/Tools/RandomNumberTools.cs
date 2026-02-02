@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 using ToolsLibrary.Tools;
 
 /// <summary>
@@ -9,16 +9,6 @@ using ToolsLibrary.Tools;
 [McpServerToolType]
 public class RandomNumberTools
 {
-    [McpServerTool]
-    [Description("Generates a random number between the specified minimum and maximum values.")]
-    public Task<int> GetRandomNumber(
-       IMcpServer mcpServer,
-       [Description("Minimum value (inclusive)")] int min = 0,
-       [Description("Maximum value (exclusive)")] int max = 100)
-       => ElicitationHelper.InvokeEliciation(mcpServer, nameof(GetRandomNumber), () => Random.Shared.Next(min, max));
-
-
-
     [McpServerTool]
     [Description("Generates a random number based on a date.")]
     public Task<int> GetRandomNumberFromDateTime(
@@ -39,5 +29,13 @@ public class RandomNumberTools
 
                 return Random.Shared.Next(min, max);
             });
-}
 
+    [McpServerTool]
+    [Description("Generates a random number between the specified minimum and maximum values.")]
+    public Task<int> GetRandomNumber(
+   IMcpServer mcpServer,
+   [Description("Minimum value (inclusive)")] int min = 0,
+   [Description("Maximum value (exclusive)")] int max = 100)
+   => ElicitationHelper.InvokeEliciation(mcpServer, nameof(GetRandomNumber), () => Random.Shared.Next(min, max));
+
+}
