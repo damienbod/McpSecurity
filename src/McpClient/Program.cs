@@ -11,13 +11,17 @@ var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
-// human-in-the-loop for function calling approval
+// -------------------------------------------------------
+// Configuration:
+// -------------------------------------------------------
 var applyHumanInTheLoop = false;
 var useMcpElicitation = false;
-var useSecureTransport = true;
+var useSecureTransport = false;
 
-// Create base chat client
-var baseChatClient = ChatClientHelper.GetChatClient(config);
+
+// -------------------------------------------------------
+// MCP setup:
+// -------------------------------------------------------
 
 // initialize MCP client
 using var httpClient = new HttpClient();
@@ -32,6 +36,13 @@ await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport,
 // Get MCP tools as AIFunctions
 var mcpTools = await mcpClient.GetMcpToolsAsAIFunctionsAsync();
 
+// -------------------------------------------------------
+// MEAI setup:
+// -------------------------------------------------------
+
+// Create base chat client
+var baseChatClient = ChatClientHelper.GetChatClient(config);
+
 // Create chat client with function invocation if using elicitation (auto-invoke)
 IChatClient chatClient = useMcpElicitation || !applyHumanInTheLoop
     ? new ChatClientBuilder(baseChatClient).UseFunctionInvocation().Build()
@@ -40,6 +51,10 @@ IChatClient chatClient = useMcpElicitation || !applyHumanInTheLoop
 // Prepare chat options with tools
 var chatOptions = ChatClientHelper.CreateChatOptions(mcpTools.Cast<AITool>());
 
+
+// -------------------------------------------------------
+// Prompt seutp & execution:
+// -------------------------------------------------------
 var prompt = "Please generate a random number";
 //var prompt = "Please generate a random number based on the current date.";
 //var prompt = "Please generate a random string";
