@@ -92,6 +92,11 @@ internal partial class PromptingService
                 session.History.Add(new ChatMessage(ChatRole.Tool, [errorContent]));
             }
         }
+        else
+        {
+            var errorContent = new FunctionResultContent(functionCall.CallId, $"Error: Tool '{functionCall.Name}' not found");
+            session.History.Add(new ChatMessage(ChatRole.Tool, [errorContent]));
+        }
 
         session.PendingCalls.Remove(functionId);
 

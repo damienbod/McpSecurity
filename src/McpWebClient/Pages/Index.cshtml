@@ -8,13 +8,17 @@
 <form method="post" asp-page="Index">
     <div class="mb-3">
         <label class="form-label" for="SelectedFunctionCallingMode">Function Calling Mode:</label>
-        <select class="form-select" id="SelectedFunctionCallingMode" name="SelectedFunctionCallingMode" asp-for="SelectedFunctionCallingMode" asp-items="Html.GetEnumSelectList<FunctionCallingMode>()"></select>
+        <select class="form-select" id="SelectedFunctionCallingMode" name="SelectedFunctionCallingMode"
+                asp-for="SelectedFunctionCallingMode"
+                asp-items="Html.GetEnumSelectList<FunctionCallingMode>()"></select>
         <span asp-validation-for="SelectedFunctionCallingMode" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label class="form-label" for="SelectedMode">Approval Mode:</label>
-        <select class="form-select" id="SelectedMode" name="SelectedMode" asp-for="SelectedMode" asp-items="Html.GetEnumSelectList<ApprovalMode>()"></select>
+        <select class="form-select" id="SelectedMode" name="SelectedMode"
+                asp-for="SelectedMode"
+                asp-items="Html.GetEnumSelectList<ApprovalMode>()"></select>
         <span asp-validation-for="SelectedMode" class="text-danger"></span>
     </div>
 
@@ -23,7 +27,6 @@
         <textarea class="form-control" rows="5" id="Prompt" name="Prompt">@Model.Prompt</textarea>
         <span asp-validation-for="Prompt" class="text-danger"></span>
     </div>
-
 
     <div class="mb-3 mt-3">
         <div class="control">
@@ -51,11 +54,13 @@
                                 <form method="post" asp-page-handler="Approve" asp-route-functionId="@f.Id" class="d-inline">
                                     <input type="hidden" name="Prompt" value="@Model.Prompt" />
                                     <input type="hidden" name="SelectedMode" value="@Model.SelectedMode" />
+                                    <input type="hidden" name="SelectedFunctionCallingMode" value="@Model.SelectedFunctionCallingMode" />
                                     <button type="submit" class="btn btn-sm btn-success me-1">Approve</button>
                                 </form>
                                 <form method="post" asp-page-handler="Decline" asp-route-functionId="@f.Id" class="d-inline">
                                     <input type="hidden" name="Prompt" value="@Model.Prompt" />
                                     <input type="hidden" name="SelectedMode" value="@Model.SelectedMode" />
+                                    <input type="hidden" name="SelectedFunctionCallingMode" value="@Model.SelectedFunctionCallingMode" />
                                     <button type="submit" class="btn btn-sm btn-danger">Decline</button>
                                 </form>
                             </div>

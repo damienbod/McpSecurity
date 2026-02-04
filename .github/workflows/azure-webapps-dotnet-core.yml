@@ -1,19 +1,25 @@
 
-name: Build and deploy MCP Server
+name: Build and deploy MCP Server and Web Client
 
 on:
   push:
     branches:
-    - deploy-mcp-server
+    - deploy-mcp-server-cedric
+
 env:
-  AZURE_WEBAPP_NAME: mcpoauthsecurity
-  AZURE_WEBAPP_PACKAGE_PATH: HttpMcpServer/published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 10.0.x
-  WORKING_DIRECTORY: src/HttpMcpServer
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - project: HttpMcpServer
+            working-directory: src/HttpMcpServer
+          - project: McpWebClient
+            working-directory: src/McpWebClient
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET SDK
@@ -21,31 +27,41 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
     - name: Restore
-      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+      run: dotnet restore "${{ matrix.working-directory }}"
     - name: Build
-      run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+      run: dotnet build "${{ matrix.working-directory }}" --configuration ${{ env.CONFIGURATION }} --no-restore
     - name: Test
-      run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
+      run: dotnet test "${{ matrix.working-directory }}" --no-build
     - name: Publish
-      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
-    - name: Publish Artifacts
+      run: dotnet publish "${{ matrix.working-directory }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ matrix.project }}/published"
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: webapp
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        name: ${{ matrix.project }}
+        path: ${{ matrix.project }}/published
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    strategy:
+      matrix:
+        include:
+          - project: HttpMcpServer
+            app-name: mvp-playground-mcp
+            publish-profile-secret: AZURE_WEBAPP_PUBLISH_PROFILE_CEDRIC
+          - project: McpWebClient
+            app-name: mvp-playground-mcpclient
+            publish-profile-secret: AZURE_WEBAPP_PUBLISH_PROFILE_CEDRIC_CLIENT
     steps:
-    - name: Download artifact from build job
+    - name: Download Artifact
       uses: actions/download-artifact@v4
       with:
-        name: webapp
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        name: ${{ matrix.project }}
+        path: ${{ matrix.project }}/published
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        app-name: ${{ matrix.app-name }}
+        publish-profile: ${{ secrets[matrix.publish-profile-secret] }}
+        package: ${{ matrix.project }}/published
         
