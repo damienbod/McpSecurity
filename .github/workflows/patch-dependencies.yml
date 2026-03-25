@@ -10,186 +10,170 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry-run (detect updates but do not write files or open PRs)'
+        description: 'Dry-run – detect updates and print them, but do not open an issue'
         type: boolean
         default: false
 
 # ─── Permissions ─────────────────────────────────────────────────────────────
 permissions:
-  contents: write        # push the update branch
-  pull-requests: write   # open the PR
-  issues: write          # open a Copilot issue on build failure
+  issues: write   # open the Copilot coding-agent issue
 
 # ─── Jobs ────────────────────────────────────────────────────────────────────
 jobs:
-  patch:
-    name: Detect & Apply Updates
+  detect-and-delegate:
+    name: Detect outdated packages and delegate to Copilot
     runs-on: ubuntu-latest
-
-    outputs:
-      packages_changed: ${{ steps.update.outputs.packages_changed }}
-      sdk_changed:      ${{ steps.update.outputs.sdk_changed }}
-      update_summary:   ${{ steps.update.outputs.update_summary }}
-      new_sdk_version:  ${{ steps.update.outputs.new_sdk_version }}
-      branch_name:      ${{ steps.branch.outputs.name }}
 
     steps:
       # ── Checkout ────────────────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          # Use a PAT so that the push later can trigger downstream workflows
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
       # ── .NET SDK ────────────────────────────────────────────────────────────
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          # Always use the latest .NET 10 patch release
           dotnet-version: '10.0.x'
 
-      # ── Run the update script ───────────────────────────────────────────────
-      - name: Apply dependency updates
-        id: update
-        shell: pwsh
+      # ── Detect outdated packages ─────────────────────────────────────────────
+      # dotnet list package --outdated --include-prerelease shows ALL available
+      # versions including next-major previews (e.g. .NET 11 previews).
+      # We capture the raw output and pass it to the Copilot issue so the agent
+      # can make informed decisions about which versions to target.
+      - name: Detect outdated packages
+        id: detect
         run: |
-          $dryRun = '${{ github.event.inputs.dry_run }}' -eq 'true'
-          $flag   = if ($dryRun) { '-DryRun' } else { '' }
-          & ./scripts/Update-Dependencies.ps1 @($flag ? '-DryRun' : @())
+          OUTDATED=$(dotnet list Mcp.sln package --outdated --include-prerelease 2>&1 || true)
+          echo "outdated<<EOF_OUTDATED" >> "$GITHUB_OUTPUT"
+          echo "$OUTDATED"             >> "$GITHUB_OUTPUT"
+          echo "EOF_OUTDATED"          >> "$GITHUB_OUTPUT"
 
-      # ── Resolve branch name ─────────────────────────────────────────────────
-      - name: Resolve update branch name
-        id: branch
-        shell: pwsh
+          # has_updates = true when at least one line starts with whitespace + '>'
+          if echo "$OUTDATED" | grep -qE '^\s+>'; then
+            echo "has_updates=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "has_updates=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── Nothing to do ────────────────────────────────────────────────────────
+      - name: Nothing to update
+        if: steps.detect.outputs.has_updates != 'true'
+        run: echo "✅ All packages are already up to date – no issue opened."
+
+      # ── Skip due to dry-run ───────────────────────────────────────────────────
+      - name: Dry-run – show detected updates without opening an issue
+        if: steps.detect.outputs.has_updates == 'true' && inputs.dry_run == true
         run: |
-          $date   = Get-Date -Format 'yyyyMMdd'
-          $branch = "deps/auto-update-$date"
-          "name=$branch" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          echo "🔍 Dry-run mode – the following updates were detected:"
+          echo "${{ steps.detect.outputs.outdated }}"
 
-      # ── Build ───────────────────────────────────────────────────────────────
-      - name: Restore NuGet packages
-        if: steps.update.outputs.packages_changed == 'true' || steps.update.outputs.sdk_changed == 'true'
-        run: dotnet restore Mcp.sln
-
-      - name: Build solution
-        id: build
-        if: steps.update.outputs.packages_changed == 'true' || steps.update.outputs.sdk_changed == 'true'
-        run: dotnet build Mcp.sln --no-restore --configuration Release
-        continue-on-error: true
-
-      # ── Tests ───────────────────────────────────────────────────────────────
-      - name: Run tests
-        id: test
-        if: steps.build.outcome == 'success'
-        run: dotnet test Mcp.sln --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
-        continue-on-error: true
-
-      # ── Upload test results ─────────────────────────────────────────────────
-      - name: Upload test results
-        if: steps.test.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: '**/*.trx'
-
-      # ── Capture build errors for the Copilot issue ──────────────────────────
-      - name: Capture build error log
-        id: build_errors
-        if: steps.build.outcome == 'failure'
-        shell: pwsh
-        run: |
-          $log = dotnet build Mcp.sln --no-restore --configuration Release 2>&1 |
-                 Where-Object { $_ -match 'error|Error' } |
-                 Select-Object -First 60 |
-                 Out-String
-          # Write as multiline output
-          $delim = [Guid]::NewGuid().ToString('N')
-          "build_log<<$delim"  | Out-File $env:GITHUB_OUTPUT -Append
-          $log                 | Out-File $env:GITHUB_OUTPUT -Append
-          $delim               | Out-File $env:GITHUB_OUTPUT -Append
-
-      # ── Open Copilot issue on build failure ─────────────────────────────────
-      - name: Open issue and assign to GitHub Copilot (breaking changes)
-        if: steps.build.outcome == 'failure' && github.event.inputs.dry_run != 'true'
+      # ── Check for an existing open update issue ───────────────────────────────
+      # Avoid opening a duplicate if last week's issue is still open.
+      - name: Check for existing open update issue
+        id: existing
+        if: steps.detect.outputs.has_updates == 'true' && inputs.dry_run != true
         uses: actions/github-script@v7
         with:
           script: |
-            const summary = `${{ steps.update.outputs.update_summary }}`;
-            const buildLog = `${{ steps.build_errors.outputs.build_log }}`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              labels: 'dependencies,automated',
+              per_page: 10,
+            });
+            const existing = issues.find(i => i.title.startsWith('chore: update dependencies'));
+            if (existing) {
+              core.notice(`Open update issue already exists: ${existing.html_url} – skipping.`);
+              core.setOutput('skip', 'true');
+            } else {
+              core.setOutput('skip', 'false');
+            }
+
+      # ── Open Copilot coding-agent issue ──────────────────────────────────────
+      - name: Open issue assigned to GitHub Copilot
+        if: >
+          steps.detect.outputs.has_updates == 'true' &&
+          inputs.dry_run != true &&
+          steps.existing.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const outdated = `${{ steps.detect.outputs.outdated }}`;
+            const date     = new Date().toISOString().slice(0, 10);
 
             const body = [
-              '## 🔴 Automated dependency update – build failure',
+              '## 🤖 Automated dependency update request',
               '',
-              'The weekly dependency update workflow bumped the packages below, but the',
-              'build now fails. @github-copilot please fix the breaking changes.',
+              'This issue was opened automatically by the weekly dependency patching workflow.',
+              '@github-copilot please carry out **all** of the steps below and open a pull request when done.',
               '',
-              '### Updated packages',
-              summary,
+              '---',
               '',
-              '### Build errors',
+              '## Outdated packages detected',
               '```',
-              buildLog,
+              outdated,
               '```',
               '',
-              '### Instructions for Copilot',
-              '1. Fix any API breaking changes introduced by the package updates listed above.',
-              '2. Prefer minimal, surgical changes – do not refactor unrelated code.',
-              '3. Keep all existing tests passing.',
-              '4. Commit the fixes and create a pull request targeting `main`.',
+              '---',
+              '',
+              '## Step-by-step instructions',
+              '',
+              '### 1 — Update NuGet packages',
+              '',
+              'Install the `dotnet-outdated-tool` and run it with `--pre-release Auto`:',
+              '```bash',
+              'dotnet tool install --global dotnet-outdated-tool',
+              'dotnet outdated Mcp.sln --upgrade --pre-release Auto',
+              '```',
+              '',
+              '**`--pre-release Auto` rules (follow these strictly):**',
+              '- A package currently on a **prerelease** version → upgrade to the **latest prerelease** of the *same major*.',
+              '- A package currently on a **stable** version → upgrade to the **latest stable** only.',
+              '- **Never** bump a package to a higher major version than the one already in use.',
+              '  For example, if `Microsoft.Extensions.*` is on `10.x` and the latest is `11.0.0-preview.*`,',
+              '  do **not** upgrade to `11.x`. Stay on the latest `10.x` stable release.',
+              '',
+              '### 2 — Fix any breaking changes',
+              '',
+              '- Run `dotnet build Mcp.sln --configuration Release` after updating.',
+              '- If the build fails, inspect the errors and fix **only** the code broken by the package updates.',
+              '- Make minimal, surgical changes — do not refactor unrelated code.',
+              '- Pay special attention to `ModelContextProtocol` and `ModelContextProtocol.AspNetCore`:',
+              '  the MCP SDK has moved from `0.x` preview to `1.x` stable and may have breaking API changes.',
+              '',
+              '### 3 — Update the .NET SDK version in CI workflow files',
+              '',
+              '- Run `dotnet --version` to get the installed SDK version (e.g. `10.0.201`).',
+              '- Open every `.github/workflows/*.yml` file.',
+              '- If any file pins an **older patch** of the same major.minor (e.g. `10.0.100` while `10.0.201` is current),',
+              '  update it. Leave wildcard entries like `10.0.x` unchanged.',
+              '- Do **not** change the major.minor (e.g. do not switch from `10.0.x` to `11.0.x`).',
+              '',
+              '### 4 — Run tests',
+              '',
+              '```bash',
+              'dotnet test Mcp.sln --no-build --configuration Release',
+              '```',
+              '',
+              'Fix any test failures caused by the updated packages.',
+              '',
+              '### 5 — Open a pull request',
+              '',
+              `- Branch name: \`deps/auto-update-${date}\``,
+              '- Target: `main`',
+              `- Title: \`chore: update dependencies (${date})\``,
+              '- PR body must include a markdown table of every package that changed (old → new version).',
+              '- Add the labels `dependencies` and `automated` to the PR.',
             ].join('\n');
 
             const { data: issue } = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo:  context.repo.repo,
-              title: `fix: resolve breaking changes from dependency update (${ new Date().toISOString().slice(0,10) })`,
+              owner:     context.repo.owner,
+              repo:      context.repo.repo,
+              title:     `chore: update dependencies (${date})`,
               body,
-              labels: ['dependencies', 'breaking-change', 'copilot'],
+              labels:    ['dependencies', 'automated'],
               assignees: ['copilot'],
             });
 
-            core.notice(`Copilot issue opened: ${issue.html_url}`);
-
-      # ── Commit changes and open a PR (success path) ─────────────────────────
-      - name: Create pull request
-        if: >
-          steps.build.outcome == 'success' &&
-          (steps.update.outputs.packages_changed == 'true' || steps.update.outputs.sdk_changed == 'true') &&
-          github.event.inputs.dry_run != 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ steps.branch.outputs.name }}
-          commit-message: |
-            chore: auto-update dependencies (${{ steps.branch.outputs.name }})
-
-            Updated via the agentic patch workflow.
-          title: '🤖 chore: auto-update dependencies'
-          body: |
-            ## Automated dependency update
-
-            This pull request was opened automatically by the **Agentic Dependency Patching** workflow.
-
-            ### Package changes
-
-            ${{ steps.update.outputs.update_summary }}
-
-            ### .NET SDK
-            SDK version in CI workflow files updated to `${{ steps.update.outputs.new_sdk_version }}`: ${{ steps.update.outputs.sdk_changed }}
-
-            ### Validation
-            | Step | Result |
-            |------|--------|
-            | Build | ✅ passed |
-            | Tests | ${{ steps.test.outcome == 'success' && '✅ passed' || steps.test.outcome == 'skipped' && '⏭ no test projects found' || '⚠️ failed (see artifacts)' }} |
-
-            > **Note:** If any MCP API surfaces changed, review the MCP package release notes before merging.
-          labels: |
-            dependencies
-            automated
-          delete-branch: true
-
-      # ── No-op message when nothing changed ──────────────────────────────────
-      - name: Report – nothing to update
-        if: steps.update.outputs.packages_changed != 'true' && steps.update.outputs.sdk_changed != 'true'
-        run: echo "✅ All packages and SDK references are already up to date."
+            core.notice(`✅ Copilot coding-agent issue opened: ${issue.html_url}`);
