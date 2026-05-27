@@ -7,7 +7,7 @@ namespace ToolsLibrary.Tools;
 
 public static class ElicitationHelper
 {
-    public static async Task<T> InvokeEliciation<T>(IMcpServer mcpServer, string toolName, Func<T> toolExecution)
+    public static async Task<T> InvokeEliciation<T>(McpServer mcpServer, string toolName, Func<T> toolExecution)
     {
         if (mcpServer.ClientCapabilities?.Elicitation == null)
         {

@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Identity.Client;
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
@@ -18,11 +19,12 @@ public class McpHelper
     public static async Task<IClientTransport> CreateUnsecureMcpTransportAsync(HttpClient httpClient, IConfigurationRoot configuration)
     {
         var httpMcpServer = configuration["HttpMcpServerUrl"];
-        var transport = new SseClientTransport(new()
+        var transport = new HttpClientTransport(new HttpClientTransportOptions()
         {
             Endpoint = new Uri(httpMcpServer!),
             Name = "MCP Desktop Client",
-        }, httpClient);
+            TransportMode = HttpTransportMode.StreamableHttp,
+        }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
 
         return transport;
     }
@@ -38,11 +40,12 @@ public class McpHelper
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         var httpMcpServer = configuration["HttpMcpServerUrl"];
-        var transport = new SseClientTransport(new()
+        var transport = new HttpClientTransport(new HttpClientTransportOptions()
         {
             Endpoint = new Uri(httpMcpServer!),
             Name = "MCP Desktop Client",
-        }, httpClient);
+            TransportMode = HttpTransportMode.StreamableHttp,
+        }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
 
         return transport;
     }
@@ -86,12 +89,17 @@ public class McpHelper
            {
                Elicitation = new()
                {
-                   ElicitationHandler = HandleElicitationAsync,
+                   Form = new(),
                },
                Sampling = new()
                {
-                   SamplingHandler = HandleSamplingAsync,
+                   Context = new(),
                }
+           },
+           Handlers = new()
+           {
+               ElicitationHandler = HandleElicitationAsync,
+               SamplingHandler = HandleSamplingAsync,
            }
        };
 
@@ -100,7 +108,7 @@ public class McpHelper
         // do some LLM call here
         return new CreateMessageResult()
         {
-            Content = new TextContentBlock() { Text = Guid.NewGuid().ToString() },
+            Content = [new TextContentBlock() { Text = Guid.NewGuid().ToString() }],
             Model = "sample-model",
             Role = Role.Assistant,
         };

@@ -11,7 +11,7 @@ public static class ChatClientExtensions
     /// <summary>
     /// Retrieves MCP tools and returns them as AIFunction instances for use with IChatClient
     /// </summary>
-    public static async Task<IList<AIFunction>> GetMcpToolsAsAIFunctionsAsync(this IMcpClient mcpClient)
+    public static async Task<IList<AIFunction>> GetMcpToolsAsAIFunctionsAsync(this McpClient mcpClient)
     {
         // Retrieve the list of tools available on the MCP server
         var tools = await mcpClient.ListToolsAsync().ConfigureAwait(false);

@@ -16,9 +16,9 @@ public class DocumentationResource
             MimeType = "text/markdown",
             Text =
 """
-# MCP Server Overview (v1.2)
+# MCP Server Overview (v1.3)
 
-This MCP server provides a stateless HTTP transport at `/mcp` and exposes Prompts, Tools, and Resources.
+This MCP server provides a stateless Streamable HTTP transport at `/mcp` and exposes Prompts, Tools, and Resources.
 
 ## Tools
 
