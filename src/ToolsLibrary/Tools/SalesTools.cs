@@ -7,7 +7,7 @@ using ToolsLibrary.Models;
 namespace ToolsLibrary.Tools;
 
 [McpServerToolType]
-public class SalesTools
+public class SalesTools(SalesDataStore store)
 {
     private static readonly JsonSerializerOptions _json = new()
     {
@@ -17,7 +17,7 @@ public class SalesTools
 
     [McpServerTool]
     [Description("Returns all customers with their Id, Name, Industry, Tier, AccountManager and Email.")]
-    public string GetAllCustomers(SalesDataStore store)
+    public string GetAllCustomers()
     {
         var customers = store.GetAllCustomers().Select(c => new
         {
@@ -30,7 +30,7 @@ public class SalesTools
 
     [McpServerTool]
     [Description("Returns all orders across all customers including status (OnTime, Delayed, InProgress), dates and value.")]
-    public string GetAllOrders(SalesDataStore store)
+    public string GetAllOrders()
     {
         var customers = store.GetAllCustomers().ToDictionary(c => c.Id, c => c.Name);
         var orders = store.GetAllOrders().Select(o => MapOrder(o, customers));
@@ -39,7 +39,7 @@ public class SalesTools
 
     [McpServerTool]
     [Description("Returns all orders for a specific customer by their customerId.")]
-    public string GetCustomerOrders(SalesDataStore store, [Description("The customer Id, e.g. 'fabrikam-gmbh'")] string customerId)
+    public string GetCustomerOrders([Description("The customer Id, e.g. 'fabrikam-gmbh'")] string customerId)
     {
         var customers = store.GetAllCustomers().ToDictionary(c => c.Id, c => c.Name);
         var orders = store.GetOrdersByCustomer(customerId).Select(o => MapOrder(o, customers));
@@ -48,7 +48,7 @@ public class SalesTools
 
     [McpServerTool]
     [Description("Returns only delayed orders. Includes how many days late each order is.")]
-    public string GetDelayedOrders(SalesDataStore store)
+    public string GetDelayedOrders()
     {
         var customers = store.GetAllCustomers().ToDictionary(c => c.Id, c => c.Name);
         var delayed = store.GetDelayedOrders().Select(o =>
