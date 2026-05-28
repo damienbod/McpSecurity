@@ -1,8 +1,11 @@
+using ToolsLibrary.Data;
 using ToolsLibrary.Prompts;
 using ToolsLibrary.Resources;
 using ToolsLibrary.Tools;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<SalesDataStore>();
 
 builder.Services
        .AddMcpServer()
@@ -14,7 +17,8 @@ builder.Services
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()
        .WithTools<SamplingTool>()
-       .WithTools<DateTools>();
+       .WithTools<DateTools>()
+       .WithTools<SalesTools>();
 
 // Add services to the container.
 var app = builder.Build();
