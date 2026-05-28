@@ -15,7 +15,7 @@ public class SalesAssistantService
 {
     private const string SystemPrompt =
         "You are a Sales Assistant with direct access to sales data through built-in tools. " +
-        "Available tools: GetAllCustomers, GetAllOrders, GetCustomerOrders, GetDelayedOrders. " +
+        "Available tools: get_all_customers, get_all_orders, get_customer_orders, get_delayed_orders. " +
         "Use tools to retrieve data when needed, then answer concisely based on the results. " +
         "Do NOT ask the user to provide data or connect external systems — the data is already available. " +
         "Do NOT call the same tool more than once per response. " +
@@ -127,8 +127,9 @@ public class SalesAssistantService
         var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var serverUrl = _configuration["HttpMcpServerUrl"]
-            ?? throw new InvalidOperationException("HttpMcpServerUrl is not configured.");
+        var serverUrl = _configuration["SalesMcpServerUrl"]
+            ?? _configuration["HttpMcpServerUrl"]
+            ?? throw new InvalidOperationException("SalesMcpServerUrl / HttpMcpServerUrl is not configured.");
 
         return new HttpClientTransport(new HttpClientTransportOptions
         {
@@ -140,8 +141,8 @@ public class SalesAssistantService
 
     private static async Task<(List<SalesCustomerView>, List<SalesOrderView>)> RefreshContextAsync(IList<AIFunction> tools)
     {
-        var customerTool = tools.FirstOrDefault(t => t.Name == "GetAllCustomers");
-        var orderTool = tools.FirstOrDefault(t => t.Name == "GetAllOrders");
+        var customerTool = tools.FirstOrDefault(t => t.Name == "get_all_customers");
+        var orderTool = tools.FirstOrDefault(t => t.Name == "get_all_orders");
 
         List<SalesCustomerView> customers = [];
         List<SalesOrderView> orders = [];

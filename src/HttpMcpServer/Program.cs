@@ -26,6 +26,7 @@ builder.Services.AddAuthentication()
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<SalesDataStore>();
+builder.Services.AddTransient<SalesTools>();
 
 builder.Services
        .AddMcpServer()
