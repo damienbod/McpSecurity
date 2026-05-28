@@ -31,7 +31,7 @@ var transport = useSecureTransport
    ? await McpHelper.CreateMcpTransportAsync(httpClient, config)
    : await McpHelper.CreateUnsecureMcpTransportAsync(httpClient, config);
 
-await using IMcpClient mcpClient = await McpClientFactory.CreateAsync(transport, useMcpElicitation ? McpHelper.CreateMcpClientOptions() : new());
+await using var mcpClient = await ModelContextProtocol.Client.McpClient.CreateAsync(transport, useMcpElicitation ? McpHelper.CreateMcpClientOptions() : new());
 
 // Get MCP tools as AIFunctions
 var mcpTools = await mcpClient.GetMcpToolsAsAIFunctionsAsync();

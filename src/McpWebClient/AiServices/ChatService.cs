@@ -5,6 +5,7 @@ using ClientLibrary;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.AiServices.Models;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Identity.Web;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -37,7 +38,7 @@ public class ChatService
     private readonly ElicitationCoordinator _elicitationCoordinator;
     private IChatClient _chatClient;
     private IList<AIFunction> _tools = [];
-    private IMcpClient _mcpClient = null!;
+    private McpClient _mcpClient = null!;
     private bool _initialized;
     private ApprovalMode _approvalMode = ApprovalMode.Auto;
     private FunctionCallingMode _functionCallingMode = FunctionCallingMode.Local;
@@ -89,7 +90,7 @@ public class ChatService
         }
         else
         {
-            _mcpClient = await McpClientFactory.CreateAsync(await CreateMcpTransport(clientFactory), GetMcpOptions());
+            _mcpClient = await McpClient.CreateAsync(await CreateMcpTransport(clientFactory), GetMcpOptions());
             _tools = await _mcpClient.GetMcpToolsAsAIFunctionsAsync();
         }
 
@@ -108,7 +109,8 @@ public class ChatService
         return _approvalMode == ApprovalMode.Elicitation ? new McpClientOptions
         {
             ClientInfo = new() { Name = "WebElicitationClient", Version = "1.0.0" },
-            Capabilities = new() { Elicitation = new() { ElicitationHandler = HandleElicitationAsync } }
+            Capabilities = new() { Elicitation = new() { Form = new() } },
+            Handlers = new() { ElicitationHandler = HandleElicitationAsync }
         } : null;
     }
 
@@ -131,11 +133,12 @@ public class ChatService
         }
 
         var httpMcpServer = _configuration["HttpMcpServerUrl"] ?? throw new ArgumentNullException("Configuration missing for HttpMcpServerUrl");
-        var transport = new SseClientTransport(new()
+        var transport = new HttpClientTransport(new HttpClientTransportOptions()
         {
             Endpoint = new Uri(httpMcpServer!),
             Name = clientName,
-        }, httpClient);
+            TransportMode = HttpTransportMode.StreamableHttp,
+        }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
 
         return transport;
     }

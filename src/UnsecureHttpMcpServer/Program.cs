@@ -6,7 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
        .AddMcpServer()
-       .WithHttpTransport()
+       .WithHttpTransport(options =>
+       {
+           options.Stateless = true;
+       })
        .WithPrompts<PromptExamples>()
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()

@@ -15,10 +15,10 @@ builder.Services.AddAuthentication()
     options.ResourceMetadata = new()
     {
         ResourceName = "HttpMcpServer demo server",
-        Resource = new Uri($"{httpMcpServerUrl!}/mcp"),
-        AuthorizationServers = [new Uri(authority)],
-        ResourceDocumentation = new Uri($"{httpMcpServerUrl}/health"),
-        ScopesSupported = [builder.Configuration["McpScope"]],
+        Resource = $"{httpMcpServerUrl!}/mcp",
+        AuthorizationServers = [authority],
+        ResourceDocumentation = $"{httpMcpServerUrl}/health",
+        ScopesSupported = [builder.Configuration["McpScope"]!],
     };
 });
 
@@ -26,7 +26,10 @@ builder.Services.AddAuthorization();
 
 builder.Services
        .AddMcpServer()
-       .WithHttpTransport()
+    .WithHttpTransport(options =>
+    {
+        options.Stateless = true;
+    })
        .WithPrompts<PromptExamples>()
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()

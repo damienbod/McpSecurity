@@ -17,10 +17,7 @@ public static class ChatClientHelper
     /// <param name="autoInvokeTools">Whether to auto-invoke tools or return them for manual processing</param>
     public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null)
     {
-        var options = new ChatOptions
-        {
-            Temperature = 0f
-        };
+        var options = new ChatOptions();
 
         if (tools != null)
         {
