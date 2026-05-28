@@ -1,4 +1,5 @@
 using Microsoft.Identity.Web;
+using ToolsLibrary.Data;
 using ToolsLibrary.Prompts;
 using ToolsLibrary.Resources;
 using ToolsLibrary.Tools;
@@ -24,6 +25,8 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSingleton<SalesDataStore>();
+
 builder.Services
        .AddMcpServer()
     .WithHttpTransport(options =>
@@ -33,7 +36,8 @@ builder.Services
        .WithPrompts<PromptExamples>()
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()
-       .WithTools<DateTools>();
+       .WithTools<DateTools>()
+       .WithTools<SalesTools>();
 
 // Add CORS for HTTP transport support in browsers
 builder.Services.AddCors(options =>

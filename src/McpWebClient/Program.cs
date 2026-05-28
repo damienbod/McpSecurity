@@ -1,3 +1,4 @@
+using McpWebClient.AiServices;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.Hubs;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -33,6 +34,7 @@ public class Program
         builder.Services.AddSignalR();
         builder.Services.AddSingleton<ElicitationCoordinator>();
         builder.Services.AddScoped<ChatService>();
+        builder.Services.AddScoped<SalesAssistantService>();
 
         var app = builder.Build();
 
