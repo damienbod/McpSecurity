@@ -7,6 +7,7 @@
     var customers = Model.SalesData?.Customers ?? [];
     var orders = Model.SalesData?.Orders ?? [];
     var chatHistory = Model.SalesData?.ChatHistory ?? [];
+    var toolCalls = Model.SalesData?.ToolCalls ?? [];
 }
 
 <div class="row g-3">
@@ -148,6 +149,48 @@
         </div>
     </div>
 
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MCP Tool Calls – full-width row below both panels
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">
+                🔧 MCP Tool Calls
+                <span class="badge bg-secondary ms-2 fw-normal">auto-approved</span>
+            </div>
+            <div class="card-body py-2">
+                @if (!toolCalls.Any())
+                {
+                    <p class="text-muted fst-italic small mb-0">Tool calls will appear here after each interaction.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var call in toolCalls)
+                        {
+                            <div class="border rounded px-3 py-2 bg-light d-flex align-items-start gap-2" style="min-width:180px;">
+                                <span class="mt-1">@(call.Success ? "✅" : "❌")</span>
+                                <div>
+                                    <div class="fw-semibold small">@call.ToolName</div>
+                                    @if (!string.IsNullOrWhiteSpace(call.Arguments))
+                                    {
+                                        <code class="text-muted" style="font-size:0.72rem;">@call.Arguments</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size:0.72rem;">no arguments</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

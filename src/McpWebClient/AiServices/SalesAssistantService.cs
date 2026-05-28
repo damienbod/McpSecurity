@@ -15,11 +15,11 @@ public class SalesAssistantService
 {
     private const string SystemPrompt =
         "You are a Sales Assistant with direct access to sales data through built-in tools. " +
-        "Your available tools are: GetAllCustomers, GetAllOrders, GetCustomerOrders, GetDelayedOrders. " +
-        "IMPORTANT: Always call a tool to retrieve data before answering any question about customers or orders. " +
-        "NEVER ask the user to upload files, connect systems, or provide data — the data is already available via tools. " +
-        "When assessing customer risk, consider: customer tier (A = most critical), number of delayed orders, " +
-        "delay duration in days, and order value. Be concise and factual in your responses.";
+        "Available tools: GetAllCustomers, GetAllOrders, GetCustomerOrders, GetDelayedOrders. " +
+        "Use tools to retrieve data when needed, then answer concisely based on the results. " +
+        "Do NOT ask the user to provide data or connect external systems — the data is already available. " +
+        "Do NOT call the same tool more than once per response. " +
+        "When assessing customer risk, consider: tier (A = most critical), delay count, delay duration, and order value.";
 
     private readonly IConfiguration _configuration;
     private readonly ITokenAcquisition _tokenAcquisition;
@@ -69,7 +69,9 @@ public class SalesAssistantService
                 throw new InvalidOperationException(
                     "No MCP tools were loaded from the server. Ensure the MCP server is running and reachable.");
 
-            var wrappedClient = new ChatClientBuilder(chatClient).UseFunctionInvocation().Build();
+            var wrappedClient = new ChatClientBuilder(chatClient)
+                .UseFunctionInvocation()
+                .Build();
 
             var chatOptions = ChatClientHelper.CreateChatOptions(tools.Cast<AITool>());
 
@@ -83,18 +85,21 @@ public class SalesAssistantService
             var response = await wrappedClient.GetResponseAsync(messagesWithSystem, chatOptions);
             var finalAnswer = response.Messages.LastOrDefault(m => m.Role == ChatRole.Assistant)?.Text;
 
-            // Append assistant messages to session history
+            // Extract MCP tool calls made during this turn for display
+            var toolCalls = ExtractToolCalls(response.Messages);
+
+            // Append assistant/tool messages to session history for multi-turn context
             foreach (var msg in response.Messages)
             {
                 if (msg.Role == ChatRole.Assistant || msg.Role == ChatRole.Tool)
                     session.History.Add(msg);
             }
 
-            // Refresh context data after the AI turn
-            (customers, orders) = await RefreshContextAsync(mcpClient);
+            // Refresh context data after the AI turn (reuse already-fetched tools)
+            (customers, orders) = await RefreshContextAsync(tools);
 
             var chatHistory = BuildChatHistory(session.History);
-            return new SalesResponse(finalAnswer, chatHistory, customers, orders);
+            return new SalesResponse(finalAnswer, chatHistory, customers, orders, toolCalls);
         }
         finally
         {
@@ -133,10 +138,8 @@ public class SalesAssistantService
         }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
     }
 
-    private static async Task<(List<SalesCustomerView>, List<SalesOrderView>)> RefreshContextAsync(McpClient mcpClient)
+    private static async Task<(List<SalesCustomerView>, List<SalesOrderView>)> RefreshContextAsync(IList<AIFunction> tools)
     {
-        var tools = await mcpClient.GetMcpToolsAsAIFunctionsAsync();
-
         var customerTool = tools.FirstOrDefault(t => t.Name == "GetAllCustomers");
         var orderTool = tools.FirstOrDefault(t => t.Name == "GetAllOrders");
 
@@ -210,6 +213,39 @@ public class SalesAssistantService
 
     private static decimal GetDecimal(JsonElement e, string prop) =>
         e.TryGetProperty(prop, out var v) && v.TryGetDecimal(out var d) ? d : 0m;
+
+    private static List<McpToolCall> ExtractToolCalls(IEnumerable<ChatMessage> messages)
+    {
+        var calls = new Dictionary<string, (string Name, string? Args)>();
+        var results = new HashSet<string>();
+
+        foreach (var msg in messages)
+        {
+            foreach (var content in msg.Contents)
+            {
+                if (content is FunctionCallContent call)
+                {
+                    string? args = null;
+                    if (call.Arguments is { Count: > 0 })
+                    {
+                        try { args = JsonSerializer.Serialize(call.Arguments); }
+                        catch { /* ignore serialization errors */ }
+                    }
+                    calls[call.CallId] = (call.Name, args);
+                }
+                else if (content is FunctionResultContent result)
+                {
+                    results.Add(result.CallId);
+                }
+            }
+        }
+
+        return calls.Select(kv => new McpToolCall(
+            kv.Value.Name,
+            kv.Value.Args,
+            results.Contains(kv.Key)
+        )).ToList();
+    }
 
     private static List<SalesChatMessage> BuildChatHistory(List<ChatMessage> history) =>
         history

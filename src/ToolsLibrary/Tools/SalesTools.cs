@@ -9,7 +9,11 @@ namespace ToolsLibrary.Tools;
 [McpServerToolType]
 public class SalesTools(SalesDataStore store)
 {
-    private static readonly JsonSerializerOptions _json = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions _json = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
     [McpServerTool]
     [Description("Returns all customers with their Id, Name, Industry, Tier, AccountManager and Email.")]
