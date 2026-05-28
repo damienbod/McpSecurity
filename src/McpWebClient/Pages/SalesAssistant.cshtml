@@ -63,14 +63,6 @@
                     <input type="hidden" name="IsNewConversation" value="@(chatHistory.Any() ? "false" : "true")" />
 
                     <div class="mb-2">
-                        <label class="form-label small fw-semibold mb-1">MCP Mode</label>
-                        <select class="form-select form-select-sm" name="SelectedMode" asp-for="SelectedMode">
-                            <option value="McpUnsecure">Unauthenticated MCP</option>
-                            <option value="McpSecure">Confidential OIDC MCP</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
                         <textarea class="form-control" rows="3" name="Prompt"
                                   placeholder="Ask a question about customers or orders…"
                                   asp-for="Prompt"></textarea>

@@ -17,9 +17,6 @@ public class SalesAssistantModel : PageModel
     public string Prompt { get; set; } = string.Empty;
 
     [BindProperty]
-    public FunctionCallingMode SelectedMode { get; set; } = FunctionCallingMode.McpUnsecure;
-
-    [BindProperty]
     public bool IsNewConversation { get; set; } = true;
 
     public SalesResponse? SalesData { get; private set; }
@@ -42,8 +39,8 @@ public class SalesAssistantModel : PageModel
         {
             var userKey = GetUserKey();
             SalesData = IsNewConversation
-                ? await _salesService.BeginAsync(userKey, Prompt, SelectedMode, _clientFactory)
-                : await _salesService.ContinueAsync(userKey, Prompt, SelectedMode, _clientFactory);
+                ? await _salesService.BeginAsync(userKey, Prompt, _clientFactory)
+                : await _salesService.ContinueAsync(userKey, Prompt, _clientFactory);
 
             IsNewConversation = false;
         }

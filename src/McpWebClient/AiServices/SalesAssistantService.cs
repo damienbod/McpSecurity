@@ -32,35 +32,32 @@ public class SalesAssistantService
         _tokenAcquisition = tokenAcquisition;
     }
 
-    public async Task<SalesResponse> BeginAsync(string userKey, string prompt, FunctionCallingMode mode, IHttpClientFactory clientFactory)
+    public async Task<SalesResponse> BeginAsync(string userKey, string prompt, IHttpClientFactory clientFactory)
     {
         var session = new SalesSession();
         _sessions[userKey] = session;
-        return await ChatAsync(session, prompt, mode, clientFactory);
+        return await ChatAsync(session, prompt, clientFactory);
     }
 
-    public async Task<SalesResponse> ContinueAsync(string userKey, string prompt, FunctionCallingMode mode, IHttpClientFactory clientFactory)
+    public async Task<SalesResponse> ContinueAsync(string userKey, string prompt, IHttpClientFactory clientFactory)
     {
         if (!_sessions.TryGetValue(userKey, out var session))
         {
             session = new SalesSession();
             _sessions[userKey] = session;
         }
-        return await ChatAsync(session, prompt, mode, clientFactory);
+        return await ChatAsync(session, prompt, clientFactory);
     }
 
     public void Clear(string userKey) => _sessions.TryRemove(userKey, out _);
 
     // -------------------------------------------------------------------------
 
-    private async Task<SalesResponse> ChatAsync(SalesSession session, string prompt, FunctionCallingMode mode, IHttpClientFactory clientFactory)
+    private async Task<SalesResponse> ChatAsync(SalesSession session, string prompt, IHttpClientFactory clientFactory)
     {
-        if (mode == FunctionCallingMode.Local)
-            throw new InvalidOperationException("Sales Assistant requires an MCP server connection (Unsecure or Secure mode).");
-
         session.History.Add(new ChatMessage(ChatRole.User, prompt));
 
-        var (chatClient, mcpClient) = await CreateClientsAsync(mode, clientFactory);
+        var (chatClient, mcpClient) = await CreateClientsAsync(clientFactory);
         List<SalesCustomerView> customers = [];
         List<SalesOrderView> orders = [];
 
@@ -105,7 +102,7 @@ public class SalesAssistantService
         }
     }
 
-    private async Task<(IChatClient, McpClient)> CreateClientsAsync(FunctionCallingMode mode, IHttpClientFactory clientFactory)
+    private async Task<(IChatClient, McpClient)> CreateClientsAsync(IHttpClientFactory clientFactory)
     {
         var config = new ConfigurationBuilder()
             .AddUserSecrets<Program>()
@@ -113,20 +110,17 @@ public class SalesAssistantService
             .Build();
 
         var chatClient = ChatClientHelper.GetChatClient(config);
-        var transport = await CreateTransportAsync(mode, clientFactory);
+        var transport = await CreateTransportAsync(clientFactory);
         var mcpClient = await McpClient.CreateAsync(transport);
         return (chatClient, mcpClient);
     }
 
-    private async Task<IClientTransport> CreateTransportAsync(FunctionCallingMode mode, IHttpClientFactory clientFactory)
+    private async Task<IClientTransport> CreateTransportAsync(IHttpClientFactory clientFactory)
     {
         var httpClient = clientFactory.CreateClient();
 
-        if (mode == FunctionCallingMode.McpSecure)
-        {
-            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        }
+        var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         var serverUrl = _configuration["HttpMcpServerUrl"]
             ?? throw new InvalidOperationException("HttpMcpServerUrl is not configured.");
@@ -134,7 +128,7 @@ public class SalesAssistantService
         return new HttpClientTransport(new HttpClientTransportOptions
         {
             Endpoint = new Uri(serverUrl),
-            Name = mode == FunctionCallingMode.McpSecure ? "Secure Sales Client" : "Unsecure Sales Client",
+            Name = "Secure Sales Client",
             TransportMode = HttpTransportMode.StreamableHttp,
         }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
     }
