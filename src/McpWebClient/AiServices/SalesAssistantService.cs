@@ -14,11 +14,12 @@ namespace McpWebClient.AiServices;
 public class SalesAssistantService
 {
     private const string SystemPrompt =
-        "You are a Sales Copilot for a CRM/ERP system. " +
-        "Help the user analyze customer orders, identify delivery delays, and assess customer risk. " +
-        "Use the available tools to retrieve customer and order data. " +
-        "When assessing risk, consider: customer tier (A is most critical), number of delayed orders, " +
-        "delay duration, and order value. Be concise and actionable in your responses.";
+        "You are a Sales Assistant with direct access to sales data through built-in tools. " +
+        "Your available tools are: GetAllCustomers, GetAllOrders, GetCustomerOrders, GetDelayedOrders. " +
+        "IMPORTANT: Always call a tool to retrieve data before answering any question about customers or orders. " +
+        "NEVER ask the user to upload files, connect systems, or provide data — the data is already available via tools. " +
+        "When assessing customer risk, consider: customer tier (A = most critical), number of delayed orders, " +
+        "delay duration in days, and order value. Be concise and factual in your responses.";
 
     private readonly IConfiguration _configuration;
     private readonly ITokenAcquisition _tokenAcquisition;
@@ -66,14 +67,20 @@ public class SalesAssistantService
         try
         {
             var tools = await mcpClient.GetMcpToolsAsAIFunctionsAsync();
+
+            if (tools.Count == 0)
+                throw new InvalidOperationException(
+                    "No MCP tools were loaded from the server. Ensure the MCP server is running and reachable.");
+
             var wrappedClient = new ChatClientBuilder(chatClient).UseFunctionInvocation().Build();
 
             var chatOptions = ChatClientHelper.CreateChatOptions(tools.Cast<AITool>());
 
-            // Add system message at the start if this is the first turn
-            var messagesWithSystem = new List<ChatMessage>();
-            if (session.History.Count == 1)
-                messagesWithSystem.Add(new ChatMessage(ChatRole.System, SystemPrompt));
+            // Always prepend the system message so it's present every turn
+            var messagesWithSystem = new List<ChatMessage>
+            {
+                new(ChatRole.System, SystemPrompt)
+            };
             messagesWithSystem.AddRange(session.History);
 
             var response = await wrappedClient.GetResponseAsync(messagesWithSystem, chatOptions);
