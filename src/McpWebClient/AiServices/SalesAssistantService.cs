@@ -95,8 +95,8 @@ public class SalesAssistantService
                     session.History.Add(msg);
             }
 
-            // Refresh context data after the AI turn (reuse already-fetched tools)
-            (customers, orders) = await RefreshContextAsync(tools);
+            // Build context from actual tool results returned this turn
+            (customers, orders) = ExtractContextFromToolResults(response.Messages);
 
             var chatHistory = BuildChatHistory(session.History);
             return new SalesResponse(finalAnswer, chatHistory, customers, orders, toolCalls);
@@ -139,24 +139,59 @@ public class SalesAssistantService
         }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
     }
 
-    private static async Task<(List<SalesCustomerView>, List<SalesOrderView>)> RefreshContextAsync(IList<AIFunction> tools)
+    /// <summary>
+    /// Builds context data from the tool results actually returned in this turn's response messages.
+    /// Only shows the data the LLM actually fetched — delayed orders show only delayed, etc.
+    /// </summary>
+    private static (List<SalesCustomerView>, List<SalesOrderView>) ExtractContextFromToolResults(
+        IEnumerable<ChatMessage> messages)
     {
-        var customerTool = tools.FirstOrDefault(t => t.Name == "get_all_customers");
-        var orderTool = tools.FirstOrDefault(t => t.Name == "get_all_orders");
+        // Map callId → (toolName, jsonResult)
+        var callNames = new Dictionary<string, string>();
+        var callResults = new Dictionary<string, string>();
+
+        foreach (var msg in messages)
+        {
+            foreach (var content in msg.Contents)
+            {
+                if (content is FunctionCallContent call)
+                    callNames[call.CallId] = call.Name;
+                else if (content is FunctionResultContent result)
+                    callResults[result.CallId] = result.Result?.ToString() ?? string.Empty;
+            }
+        }
 
         List<SalesCustomerView> customers = [];
         List<SalesOrderView> orders = [];
 
-        if (customerTool != null)
+        foreach (var (callId, toolName) in callNames)
         {
-            var result = await customerTool.InvokeAsync(null);
-            customers = DeserializeCustomers(result?.ToString());
-        }
+            if (!callResults.TryGetValue(callId, out var json) || string.IsNullOrWhiteSpace(json))
+                continue;
 
-        if (orderTool != null)
-        {
-            var result = await orderTool.InvokeAsync(null);
-            orders = DeserializeOrders(result?.ToString());
+            switch (toolName)
+            {
+                case "get_all_customers":
+                    customers = DeserializeCustomers(json);
+                    break;
+
+                case "get_all_orders":
+                case "get_delayed_orders":
+                case "get_customer_orders":
+                    var fetchedOrders = DeserializeOrders(json);
+                    // merge into orders list (avoid duplicates when multiple order tools are called)
+                    var existingIds = orders.Select(o => o.Id).ToHashSet();
+                    orders.AddRange(fetchedOrders.Where(o => !existingIds.Contains(o.Id)));
+                    // populate customers from order data when no explicit customer call was made
+                    if (customers.Count == 0)
+                    {
+                        customers = fetchedOrders
+                            .GroupBy(o => o.CustomerId)
+                            .Select(g => new SalesCustomerView(g.Key, g.First().CustomerName, string.Empty, string.Empty, string.Empty))
+                            .ToList();
+                    }
+                    break;
+            }
         }
 
         return (customers, orders);
