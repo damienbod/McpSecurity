@@ -44,6 +44,11 @@ public class SalesAssistantModel : PageModel
 
             IsNewConversation = false;
         }
+        catch (MicrosoftIdentityWebChallengeUserException)
+        {
+            // Let Microsoft.Identity.Web handle incremental consent challenges.
+            throw;
+        }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
