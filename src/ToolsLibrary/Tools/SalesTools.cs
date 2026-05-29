@@ -47,11 +47,17 @@ public class SalesTools(SalesDataStore store)
     }
 
     [McpServerTool]
-    [Description("Returns only delayed orders. Includes how many days late each order is.")]
-    public string GetDelayedOrders()
+    [Description("Returns only delayed orders. Includes how many days late each order is. Optionally filters by customer ID.")]
+    public string GetDelayedOrders(
+        [Description("Optional customer ID to filter delayed orders for a specific customer.")] string? customerId = null)
     {
         var customers = store.GetAllCustomers().ToDictionary(c => c.Id, c => c.Name);
-        var delayed = store.GetDelayedOrders().Select(o =>
+        var delayedOrders = store.GetDelayedOrders();
+        if (!string.IsNullOrEmpty(customerId))
+        {
+            delayedOrders = delayedOrders.Where(o => o.CustomerId == customerId).ToList().AsReadOnly();
+        }
+        var delayed = delayedOrders.Select(o =>
         {
             var mapped = MapOrder(o, customers);
             var daysLate = o.ActualDeliveryDate.HasValue
