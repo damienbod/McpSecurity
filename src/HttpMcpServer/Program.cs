@@ -56,14 +56,24 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHttpClient();
 
-// change to scp or scope if not using magic namespaces from MS
-// The scope must be validated as we want to force only delegated access tokens
-// The scope is required to only allow access tokens intended for this API
+static bool HasScope(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext context, string requiredScope)
+{
+    var scopeClaimValues = context.User
+        .FindAll("http://schemas.microsoft.com/identity/claims/scope")
+        .Select(c => c.Value)
+        .Concat(context.User.FindAll("scp").Select(c => c.Value));
+
+    return scopeClaimValues
+        .SelectMany(v => v.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        .Any(s => string.Equals(s, requiredScope, StringComparison.Ordinal));
+}
+
+// The scope must be validated to force delegated access tokens intended for this API.
 builder.Services.AddAuthorizationBuilder()
   .AddPolicy("mcp_sales", policy =>
-        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:sales"))
+        policy.RequireAssertion(context => HasScope(context, "mcp:sales")))
   .AddPolicy("mcp_demo", policy =>
-        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:demo"));
+        policy.RequireAssertion(context => HasScope(context, "mcp:demo")));
 
 // Add services to the container.
 var app = builder.Build();
