@@ -55,6 +55,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 
 static bool HasScope(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext context, string requiredScope)
 {
@@ -70,6 +71,8 @@ static bool HasScope(Microsoft.AspNetCore.Authorization.AuthorizationHandlerCont
 
 // The scope must be validated to force delegated access tokens intended for this API.
 builder.Services.AddAuthorizationBuilder()
+  .AddPolicy("mcp_any", policy =>
+        policy.RequireAssertion(context => HasScope(context, "mcp:sales") || HasScope(context, "mcp:demo")))
   .AddPolicy("mcp_sales", policy =>
         policy.RequireAssertion(context => HasScope(context, "mcp:sales")))
   .AddPolicy("mcp_demo", policy =>
@@ -89,7 +92,6 @@ app.MapGet("/health", () => $"Secure MCP server running deployed: UTC: {DateTime
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapMcp("/mcp/sales").RequireAuthorization("mcp_sales");
-app.MapMcp("/mcp").RequireAuthorization("mcp_demo");
+app.MapMcp("/mcp").RequireAuthorization("mcp_any");
 
 app.Run();
