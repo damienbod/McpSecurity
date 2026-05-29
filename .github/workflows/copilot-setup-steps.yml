@@ -1,0 +1,33 @@
+name: "Copilot Setup Steps"
+
+on:
+    workflow_dispatch:
+    push:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+    pull_request:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+    # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+    copilot-setup-steps:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v5
+
+            - name: Set up .NET 10
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "10.0.x"
+
+            - name: Restore dependencies
+              run: dotnet restore Mcp.sln
+
+            - name: Build solution
+              run: dotnet build Mcp.sln --no-restore --configuration Debug
