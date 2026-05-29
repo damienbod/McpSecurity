@@ -1,0 +1,5 @@
+scripts:
+  - name: "HttpMcpServer"
+    command: "dotnet run --project src/HttpMcpServer/HttpMcpServer.csproj --launch-profile https"
+  - name: "McpWebClient"
+    command: "dotnet run --project src/McpWebClient/McpWebClient.csproj --launch-profile https"
