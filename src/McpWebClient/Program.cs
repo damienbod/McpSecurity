@@ -20,7 +20,10 @@ public class Program
 
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-            .EnableTokenAcquisitionToCallDownstreamApi([builder.Configuration["McpScope"]!])
+            .EnableTokenAcquisitionToCallDownstreamApi([
+                builder.Configuration["McpSalesScope"]!,
+                builder.Configuration["McpDemoScope"]!
+            ])
             .AddInMemoryTokenCaches();
 
         builder.Services.AddAuthorization(options =>

@@ -7,7 +7,7 @@ using Microsoft.Identity.Web;
 
 namespace McpWebClient.Pages;
 
-[AuthorizeForScopes(ScopeKeySection = "McpScope")]
+[AuthorizeForScopes(ScopeKeySection = "McpSalesScope")]
 public class SalesAssistantModel : PageModel
 {
     private readonly SalesAssistantService _salesService;

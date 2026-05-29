@@ -19,7 +19,10 @@ builder.Services.AddAuthentication()
         Resource = $"{httpMcpServerUrl!}/mcp",
         AuthorizationServers = [authority],
         ResourceDocumentation = $"{httpMcpServerUrl}/health",
-        ScopesSupported = [builder.Configuration["McpScope"]!],
+        ScopesSupported = [
+            builder.Configuration["McpSalesScope"]!,
+            builder.Configuration["McpDemoScope"]!
+        ],
     };
 });
 
@@ -55,10 +58,12 @@ builder.Services.AddHttpClient();
 
 // change to scp or scope if not using magic namespaces from MS
 // The scope must be validated as we want to force only delegated access tokens
-// The scope is requires to only allow access tokens intended for this API
+// The scope is required to only allow access tokens intended for this API
 builder.Services.AddAuthorizationBuilder()
-  .AddPolicy("mcp_tools", policy =>
-        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:tools"));
+  .AddPolicy("mcp_sales", policy =>
+        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:sales"))
+  .AddPolicy("mcp_demo", policy =>
+        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:demo"));
 
 // Add services to the container.
 var app = builder.Build();
@@ -74,6 +79,7 @@ app.MapGet("/health", () => $"Secure MCP server running deployed: UTC: {DateTime
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapMcp("/mcp").RequireAuthorization("mcp_tools");
+app.MapMcp("/mcp/sales").RequireAuthorization("mcp_sales");
+app.MapMcp("/mcp").RequireAuthorization("mcp_demo");
 
 app.Run();

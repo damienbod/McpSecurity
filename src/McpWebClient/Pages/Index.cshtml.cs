@@ -7,7 +7,7 @@ using Microsoft.Identity.Web;
 
 namespace McpWebClient.Pages;
 
-[AuthorizeForScopes(ScopeKeySection = "McpScope")]
+[AuthorizeForScopes(ScopeKeySection = "McpDemoScope")]
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
@@ -43,7 +43,7 @@ public class IndexModel : PageModel
 
     public IActionResult OnGet()
     {
-        // No special processing on GET – state is managed via post backs
+        // No special processing on GET ï¿½ state is managed via post backs
         return Page();
     }
 

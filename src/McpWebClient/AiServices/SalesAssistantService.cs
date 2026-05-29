@@ -124,7 +124,7 @@ public class SalesAssistantService
     {
         var httpClient = clientFactory.CreateClient();
 
-        var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
+        var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpSalesScope"]!]);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         var serverUrl = _configuration["SalesMcpServerUrl"]
