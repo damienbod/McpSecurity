@@ -1,0 +1,206 @@
+@page
+@model SalesAssistantModel
+@using McpWebClient.AiServices.Models
+@{
+    ViewData["Title"] = "Sales Assistant";
+    var hasData = Model.SalesData != null;
+    var customers = Model.SalesData?.Customers ?? [];
+    var orders = Model.SalesData?.Orders ?? [];
+    var chatHistory = Model.SalesData?.ChatHistory ?? [];
+    var toolCalls = Model.SalesData?.ToolCalls ?? [];
+}
+
+<div class="row g-3">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEFT – Chat Panel
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">💬 Sales Copilot</span>
+                <form method="post" asp-page-handler="Clear" class="mb-0">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Clear</button>
+                </form>
+            </div>
+            <div class="card-body d-flex flex-column" style="min-height:520px;">
+
+                @* Conversation history *@
+                <div id="chat-history" class="flex-grow-1 overflow-auto mb-3 pe-1" style="max-height:380px;">
+                    @if (!chatHistory.Any())
+                    {
+                        <p class="text-muted fst-italic small">
+                            Start by asking something like:<br />
+                            • "Show me delayed orders"<br />
+                            • "Which customers are at risk?"<br />
+                            • "Tell me about Fabrikam GmbH"
+                        </p>
+                    }
+                    @foreach (var msg in chatHistory)
+                    {
+                        if (msg.Role == "user")
+                        {
+                            <div class="d-flex justify-content-end mb-2">
+                                <div class="bg-primary text-white rounded px-3 py-2" style="max-width:85%; white-space:pre-wrap;">@msg.Content</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-start mb-2">
+                                <div class="bg-light border rounded px-3 py-2" style="max-width:85%; white-space:pre-wrap;">@msg.Content</div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                @* Error *@
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger small py-2">@Model.ErrorMessage</div>
+                }
+
+                @* Input form *@
+                <form method="post" class="mt-auto">
+                    <input type="hidden" name="IsNewConversation" value="@(chatHistory.Any() ? "false" : "true")" />
+
+                    <div class="mb-2">
+                        <textarea class="form-control" rows="3" name="Prompt"
+                                  placeholder="Ask a question about customers or orders…"
+                                  asp-for="Prompt"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         RIGHT – Context Panel
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">📊 Customer & Order Context</div>
+            <div class="card-body" style="max-height:600px; overflow-y:auto;">
+                @if (!hasData)
+                {
+                    <p class="text-muted fst-italic small">Context data will appear here after the first message.</p>
+                }
+                else if (!customers.Any())
+                {
+                    <p class="text-muted small">No customer data available.</p>
+                }
+                else
+                {
+                    @foreach (var customer in customers)
+                    {
+                        var customerOrders = orders.Where(o => o.CustomerId == customer.Id).ToList();
+                        var hasTier = !string.IsNullOrWhiteSpace(customer.Tier);
+                        var tierColor = customer.Tier switch { "A" => "primary", "B" => "secondary", "C" => "light", _ => "light" };
+                        var tierTextColor = customer.Tier == "C" ? "text-dark" : "text-white";
+
+                        <div class="card mb-3 border">
+                            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-semibold">@customer.Name</span>
+                                    <small class="text-muted ms-2">@customer.Industry</small>
+                                </div>
+                                @if (hasTier)
+                                {
+                                    <span class="badge bg-@tierColor @tierTextColor">Tier @customer.Tier</span>
+                                }
+                            </div>
+                            @if (customerOrders.Any())
+                            {
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var order in customerOrders)
+                                    {
+                                        var (statusBadge, statusIcon) = order.Status switch
+                                        {
+                                            "Delayed"    => ("danger",  "🔴"),
+                                            "InProgress" => ("warning", "🟡"),
+                                            _            => ("success", "🟢")
+                                        };
+                                        var delayInfo = string.Empty;
+                                        if (order.Status == "Delayed" && order.ActualDeliveryDate.HasValue)
+                                        {
+                                            var days = (int)(order.ActualDeliveryDate.Value - order.PromisedDeliveryDate).TotalDays;
+                                            delayInfo = $" (+{days}d late)";
+                                        }
+
+                                        <li class="list-group-item py-2 d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <div class="small fw-semibold">@order.ProductName</div>
+                                                <div class="text-muted" style="font-size:0.75rem;">
+                                                    Due: @order.PromisedDeliveryDate.ToString("yyyy-MM-dd")@delayInfo
+                                                    &nbsp;|&nbsp; CHF @order.Value.ToString("N0")
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-@statusBadge ms-2">@statusIcon @order.Status</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <div class="card-body py-2">
+                                    <small class="text-muted">No orders on record.</small>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MCP Tool Calls – full-width row below both panels
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">
+                🔧 MCP Tool Calls
+                <span class="badge bg-secondary ms-2 fw-normal">auto-approved</span>
+            </div>
+            <div class="card-body py-2">
+                @if (!toolCalls.Any())
+                {
+                    <p class="text-muted fst-italic small mb-0">Tool calls will appear here after each interaction.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var call in toolCalls)
+                        {
+                            <div class="border rounded px-3 py-2 bg-light d-flex align-items-start gap-2" style="min-width:180px;">
+                                <span class="mt-1">@(call.Success ? "✅" : "❌")</span>
+                                <div>
+                                    <div class="fw-semibold small">@call.ToolName</div>
+                                    @if (!string.IsNullOrWhiteSpace(call.Arguments))
+                                    {
+                                        <code class="text-muted" style="font-size:0.72rem;">@call.Arguments</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size:0.72rem;">no arguments</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-scroll chat history to bottom after page load
+        const chatHistory = document.getElementById('chat-history');
+        if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight;
+    </script>
+}

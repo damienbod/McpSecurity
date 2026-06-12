@@ -128,7 +128,7 @@ public class ChatService
         if (_functionCallingMode == FunctionCallingMode.McpSecure)
         {
             clientName = "Secure Client";
-            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpScope"]!]);
+            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync([_configuration["McpDemoScope"]!]);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
 

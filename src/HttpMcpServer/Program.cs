@@ -1,4 +1,5 @@
 using Microsoft.Identity.Web;
+using ToolsLibrary.Data;
 using ToolsLibrary.Prompts;
 using ToolsLibrary.Resources;
 using ToolsLibrary.Tools;
@@ -18,11 +19,17 @@ builder.Services.AddAuthentication()
         Resource = $"{httpMcpServerUrl!}/mcp",
         AuthorizationServers = [authority],
         ResourceDocumentation = $"{httpMcpServerUrl}/health",
-        ScopesSupported = [builder.Configuration["McpScope"]!],
+        ScopesSupported = [
+            builder.Configuration["McpSalesScope"]!,
+            builder.Configuration["McpDemoScope"]!
+        ],
     };
 });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<SalesDataStore>();
+builder.Services.AddTransient<SalesTools>();
 
 builder.Services
        .AddMcpServer()
@@ -33,7 +40,8 @@ builder.Services
        .WithPrompts<PromptExamples>()
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()
-       .WithTools<DateTools>();
+       .WithTools<DateTools>()
+       .WithTools<SalesTools>();
 
 // Add CORS for HTTP transport support in browsers
 builder.Services.AddCors(options =>
@@ -47,13 +55,28 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 
-// change to scp or scope if not using magic namespaces from MS
-// The scope must be validated as we want to force only delegated access tokens
-// The scope is requires to only allow access tokens intended for this API
+static bool HasScope(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext context, string requiredScope)
+{
+    var scopeClaimValues = context.User
+        .FindAll("http://schemas.microsoft.com/identity/claims/scope")
+        .Select(c => c.Value)
+        .Concat(context.User.FindAll("scp").Select(c => c.Value));
+
+    return scopeClaimValues
+        .SelectMany(v => v.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        .Any(s => string.Equals(s, requiredScope, StringComparison.Ordinal));
+}
+
+// The scope must be validated to force delegated access tokens intended for this API.
 builder.Services.AddAuthorizationBuilder()
-  .AddPolicy("mcp_tools", policy =>
-        policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "mcp:tools"));
+  .AddPolicy("mcp_any", policy =>
+        policy.RequireAssertion(context => HasScope(context, "mcp:sales") || HasScope(context, "mcp:demo")))
+  .AddPolicy("mcp_sales", policy =>
+        policy.RequireAssertion(context => HasScope(context, "mcp:sales")))
+  .AddPolicy("mcp_demo", policy =>
+        policy.RequireAssertion(context => HasScope(context, "mcp:demo")));
 
 // Add services to the container.
 var app = builder.Build();
@@ -69,6 +92,6 @@ app.MapGet("/health", () => $"Secure MCP server running deployed: UTC: {DateTime
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapMcp("/mcp").RequireAuthorization("mcp_tools");
+app.MapMcp("/mcp").RequireAuthorization("mcp_any");
 
 app.Run();

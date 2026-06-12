@@ -1,3 +1,4 @@
+using McpWebClient.AiServices;
 using McpWebClient.AiServices.Elicitation;
 using McpWebClient.Hubs;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -19,7 +20,10 @@ public class Program
 
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-            .EnableTokenAcquisitionToCallDownstreamApi([builder.Configuration["McpScope"]!])
+            .EnableTokenAcquisitionToCallDownstreamApi([
+                builder.Configuration["McpSalesScope"]!,
+                builder.Configuration["McpDemoScope"]!
+            ])
             .AddInMemoryTokenCaches();
 
         builder.Services.AddAuthorization(options =>
@@ -30,9 +34,11 @@ public class Program
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
+        builder.Services.AddMemoryCache();
         builder.Services.AddSignalR();
         builder.Services.AddSingleton<ElicitationCoordinator>();
         builder.Services.AddScoped<ChatService>();
+        builder.Services.AddScoped<SalesAssistantService>();
 
         var app = builder.Build();
 
