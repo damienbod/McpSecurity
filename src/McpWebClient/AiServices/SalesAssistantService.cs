@@ -1,9 +1,9 @@
-using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using ClientLibrary;
 using McpWebClient.AiServices.Models;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Identity.Web;
 using ModelContextProtocol.Client;
@@ -13,6 +13,7 @@ namespace McpWebClient.AiServices;
 
 public class SalesAssistantService
 {
+    private const int MaxHistoryMessages = 40;
     private const string SystemPrompt =
         "You are a Sales Assistant with direct access to sales data through built-in tools. " +
         "Available tools: get_all_customers, get_all_orders, get_customer_orders, get_delayed_orders. " +
@@ -23,39 +24,50 @@ public class SalesAssistantService
 
     private readonly IConfiguration _configuration;
     private readonly ITokenAcquisition _tokenAcquisition;
+    private readonly IMemoryCache _sessionCache;
+    private static readonly MemoryCacheEntryOptions SessionCacheOptions = new()
+    {
+        SlidingExpiration = TimeSpan.FromMinutes(30),
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8)
+    };
 
-    private static readonly ConcurrentDictionary<string, SalesSession> _sessions = new();
-
-    public SalesAssistantService(IConfiguration configuration, ITokenAcquisition tokenAcquisition)
+    public SalesAssistantService(
+        IConfiguration configuration,
+        ITokenAcquisition tokenAcquisition,
+        IMemoryCache sessionCache)
     {
         _configuration = configuration;
         _tokenAcquisition = tokenAcquisition;
+        _sessionCache = sessionCache;
     }
 
     public async Task<SalesResponse> BeginAsync(string userKey, string prompt, IHttpClientFactory clientFactory)
     {
         var session = new SalesSession();
-        _sessions[userKey] = session;
-        return await ChatAsync(session, prompt, clientFactory);
+        var response = await ChatAsync(session, prompt, clientFactory);
+        _sessionCache.Set(GetSessionCacheKey(userKey), session, SessionCacheOptions);
+        return response;
     }
 
     public async Task<SalesResponse> ContinueAsync(string userKey, string prompt, IHttpClientFactory clientFactory)
     {
-        if (!_sessions.TryGetValue(userKey, out var session))
-        {
-            session = new SalesSession();
-            _sessions[userKey] = session;
-        }
-        return await ChatAsync(session, prompt, clientFactory);
+        var cacheKey = GetSessionCacheKey(userKey);
+        _sessionCache.TryGetValue(cacheKey, out SalesSession? cachedSession);
+        var session = cachedSession ?? new SalesSession();
+
+        var response = await ChatAsync(session, prompt, clientFactory);
+        _sessionCache.Set(cacheKey, session, SessionCacheOptions);
+        return response;
     }
 
-    public void Clear(string userKey) => _sessions.TryRemove(userKey, out _);
+    public void Clear(string userKey) => _sessionCache.Remove(GetSessionCacheKey(userKey));
 
     // -------------------------------------------------------------------------
 
     private async Task<SalesResponse> ChatAsync(SalesSession session, string prompt, IHttpClientFactory clientFactory)
     {
         session.History.Add(new ChatMessage(ChatRole.User, prompt));
+        TrimHistory(session);
 
         var (chatClient, mcpClient) = await CreateClientsAsync(clientFactory);
         List<SalesCustomerView> customers = [];
@@ -83,7 +95,7 @@ public class SalesAssistantService
             messagesWithSystem.AddRange(session.History);
 
             var response = await wrappedClient.GetResponseAsync(messagesWithSystem, chatOptions);
-            var finalAnswer = response.Messages.LastOrDefault(m => m.Role == ChatRole.Assistant)?.Text;
+            var finalAnswer = GetMessageText(response.Messages.LastOrDefault(m => m.Role == ChatRole.Assistant));
 
             // Extract MCP tool calls made during this turn for display
             var toolCalls = ExtractToolCalls(response.Messages);
@@ -94,6 +106,7 @@ public class SalesAssistantService
                 if (msg.Role == ChatRole.Assistant || msg.Role == ChatRole.Tool)
                     session.History.Add(msg);
             }
+            TrimHistory(session);
 
             // Build context from actual tool results returned this turn
             (customers, orders) = ExtractContextFromToolResults(response.Messages);
@@ -286,9 +299,48 @@ public class SalesAssistantService
     private static List<SalesChatMessage> BuildChatHistory(List<ChatMessage> history) =>
         history
             .Where(m => m.Role == ChatRole.User || m.Role == ChatRole.Assistant)
-            .Where(m => !string.IsNullOrWhiteSpace(m.Text))
-            .Select(m => new SalesChatMessage(m.Role == ChatRole.User ? "user" : "assistant", m.Text ?? string.Empty))
+            .Select(m => new
+            {
+                Role = m.Role == ChatRole.User ? "user" : "assistant",
+                Content = GetMessageText(m)
+            })
+            .Where(m => !string.IsNullOrWhiteSpace(m.Content))
+            .Select(m => new SalesChatMessage(m.Role, m.Content!))
             .ToList();
+
+    private static string? GetMessageText(ChatMessage? message)
+    {
+        if (message == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(message.Text))
+        {
+            return message.Text;
+        }
+
+        var textParts = message.Contents
+            .OfType<TextContent>()
+            .Select(c => c.Text)
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .ToList();
+
+        return textParts.Count == 0 ? null : string.Join(Environment.NewLine, textParts);
+    }
+
+    private static string GetSessionCacheKey(string userKey) => $"sales-session:{userKey}";
+
+    private static void TrimHistory(SalesSession session)
+    {
+        if (session.History.Count <= MaxHistoryMessages)
+        {
+            return;
+        }
+
+        var removeCount = session.History.Count - MaxHistoryMessages;
+        session.History.RemoveRange(0, removeCount);
+    }
 
     private class SalesSession
     {

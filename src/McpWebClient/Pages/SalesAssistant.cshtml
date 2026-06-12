@@ -94,7 +94,8 @@
                     @foreach (var customer in customers)
                     {
                         var customerOrders = orders.Where(o => o.CustomerId == customer.Id).ToList();
-                        var tierColor = customer.Tier switch { "A" => "primary", "B" => "secondary", _ => "light" };
+                        var hasTier = !string.IsNullOrWhiteSpace(customer.Tier);
+                        var tierColor = customer.Tier switch { "A" => "primary", "B" => "secondary", "C" => "light", _ => "light" };
                         var tierTextColor = customer.Tier == "C" ? "text-dark" : "text-white";
 
                         <div class="card mb-3 border">
@@ -103,7 +104,10 @@
                                     <span class="fw-semibold">@customer.Name</span>
                                     <small class="text-muted ms-2">@customer.Industry</small>
                                 </div>
-                                <span class="badge bg-@tierColor @tierTextColor">Tier @customer.Tier</span>
+                                @if (hasTier)
+                                {
+                                    <span class="badge bg-@tierColor @tierTextColor">Tier @customer.Tier</span>
+                                }
                             </div>
                             @if (customerOrders.Any())
                             {

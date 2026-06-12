@@ -34,6 +34,7 @@ public class Program
         builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
+        builder.Services.AddMemoryCache();
         builder.Services.AddSignalR();
         builder.Services.AddSingleton<ElicitationCoordinator>();
         builder.Services.AddScoped<ChatService>();

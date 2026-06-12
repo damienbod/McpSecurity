@@ -68,7 +68,7 @@ public class SalesTools(SalesDataStore store, IHttpContextAccessor httpContextAc
             var mapped = MapOrder(o, customers);
             var daysLate = o.ActualDeliveryDate.HasValue
                 ? (int)(o.ActualDeliveryDate.Value - o.PromisedDeliveryDate).TotalDays
-                : 0;
+                : Math.Max(0, (int)(DateTime.UtcNow.Date - o.PromisedDeliveryDate.Date).TotalDays);
             return new
             {
                 mapped.Id, mapped.CustomerId, mapped.CustomerName, mapped.ProductName,
