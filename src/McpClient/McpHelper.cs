@@ -45,7 +45,7 @@ public class McpHelper
             Endpoint = new Uri(httpMcpServer!),
             Name = "MCP Desktop Client",
             TransportMode = HttpTransportMode.StreamableHttp,
-        }, httpClient, NullLoggerFactory.Instance, ownsHttpClient: false);
+        }, httpClient);
 
         return transport;
     }
@@ -89,7 +89,8 @@ public class McpHelper
            {
                Elicitation = new()
                {
-                   Form = new(),
+                   //Form = new(),
+                   Url = new(),
                },
                Sampling = new()
                {

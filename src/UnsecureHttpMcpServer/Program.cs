@@ -14,7 +14,6 @@ builder.Services
        .WithPrompts<PromptExamples>()
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()
-       .WithTools<SamplingTool>()
        .WithTools<DateTools>()
        .WithTools<SalesTools>();
 
