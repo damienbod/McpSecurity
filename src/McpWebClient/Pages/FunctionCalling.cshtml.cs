@@ -72,8 +72,20 @@ public class FunctionCallingModel : PageModel
             PromptResults = response.FinalAnswer;
             PendingFunctions = response.PendingFunctions ?? new();
             
-            _logger.LogInformation("Response received: {FinalAnswer}, PendingFunctions: {Count}", 
-                response.FinalAnswer, response.PendingFunctions?.Count ?? 0);
+            // Merge executed calls (auto-invoked) into the display list
+            if (response.ExecutedFunctions != null && response.ExecutedFunctions.Count > 0)
+            {
+                foreach (var executed in response.ExecutedFunctions)
+                {
+                    if (!PendingFunctions.Any(p => p.Id == executed.Id))
+                    {
+                        PendingFunctions.Add(executed);
+                    }
+                }
+            }
+            
+            _logger.LogInformation("Response received: {FinalAnswer}, PendingFunctions: {Count}, ExecutedFunctions: {ExecCount}", 
+                response.FinalAnswer, response.PendingFunctions?.Count ?? 0, response.ExecutedFunctions?.Count ?? 0);
         }
         catch (Exception ex)
         {

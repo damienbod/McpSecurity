@@ -33,10 +33,22 @@ internal partial class PromptingService
             .OfType<FunctionCallContent>()
             .ToArray() ?? [];
 
-        return ExtractFunctionsAndSyncSession(session, lastMessage, functionCalls);
+        // Collect all function calls executed across the response messages
+        // (relevant for auto-invoke scenarios where calls don't surface as pending)
+        var executedCalls = response.Messages
+            .SelectMany(m => m.Contents.OfType<FunctionCallContent>())
+            .Where(fc => !functionCalls.Any(p => p.CallId == fc.CallId))
+            .Select(fc => new PendingFunctionCall(
+                fc.CallId,
+                fc.Name,
+                string.Empty,
+                fc.Arguments != null ? JsonSerializer.Serialize(fc.Arguments) : string.Empty))
+            .ToList();
+
+        return ExtractFunctionsAndSyncSession(session, lastMessage, functionCalls, executedCalls);
     }
 
-    private static PromptResponse ExtractFunctionsAndSyncSession(ChatSession session, ChatMessage? lastMessage, FunctionCallContent[] functionCalls)
+    private static PromptResponse ExtractFunctionsAndSyncSession(ChatSession session, ChatMessage? lastMessage, FunctionCallContent[] functionCalls, List<PendingFunctionCall> executedCalls)
     {
         if (functionCalls.Length > 0 && lastMessage != null)
         {
@@ -46,12 +58,12 @@ internal partial class PromptingService
                 session.PendingCalls[call.CallId] = call;
             }
             session.LastUpdatedUtc = DateTime.UtcNow;
-            return new PromptResponse(null, Project(session));
+            return new PromptResponse(null, Project(session), executedCalls);
         }
 
         session.FinalAnswer = lastMessage?.Text;
         session.LastUpdatedUtc = DateTime.UtcNow;
-        return new PromptResponse(session.FinalAnswer, new());
+        return new PromptResponse(session.FinalAnswer, new(), executedCalls);
     }
 
     private async Task<Microsoft.Extensions.AI.ChatResponse> ExecutePrompt(ChatSession session)
@@ -114,7 +126,7 @@ internal partial class PromptingService
             .OfType<FunctionCallContent>()
             .ToArray() ?? [];
 
-        return ExtractFunctionsAndSyncSession(session, lastMessage, moreCalls);
+        return ExtractFunctionsAndSyncSession(session, lastMessage, moreCalls, new());
     }
 
     public Task<PromptResponse> DeclineAsync(string userKey, string functionId)
