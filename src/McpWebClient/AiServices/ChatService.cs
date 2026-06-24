@@ -184,5 +184,5 @@ public class ChatService
     public Task<PromptResponse> BeginChatAsync(string userKey, string prompt) => Handler.BeginAsync(userKey, prompt);
     public Task<PromptResponse> ApproveFunctionAsync(string userKey, string functionId) => Handler.ApproveAsync(userKey, functionId);
     public Task<PromptResponse> DeclineFunctionAsync(string userKey, string functionId) => Handler.DeclineAsync(userKey, functionId);
-    public void Clear(string userKey) => Handler.ClearSession(userKey);
+    public void Clear(string userKey) => _promptingService?.ClearSession(userKey);
 }
