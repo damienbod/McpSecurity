@@ -11,19 +11,27 @@ internal partial class PromptingService
     private readonly IChatClient _chatClient;
     private readonly IList<AIFunction> _mcpTools;
     private readonly ChatToolMode _toolMode;
+    private readonly float? _temperature;
+    private readonly string? _systemPrompt;
 
     private static readonly ConcurrentDictionary<string, ChatSession> _sessions = new();
 
-    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools, ChatToolMode? toolMode = null)
+    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools, ChatToolMode? toolMode = null, float? temperature = null, string? systemPrompt = null)
     {
         _chatClient = chatClient;
         _mcpTools = mcpTools;
         _toolMode = toolMode ?? ChatToolMode.Auto;
+        _temperature = temperature;
+        _systemPrompt = systemPrompt;
     }
 
     public async Task<PromptResponse> BeginAsync(string userKey, string prompt)
     {
         var session = _sessions[userKey] = new() { LastUpdatedUtc = DateTime.UtcNow };
+        if (!string.IsNullOrWhiteSpace(_systemPrompt))
+        {
+            session.History.Add(new ChatMessage(ChatRole.System, _systemPrompt));
+        }
         session.History.Add(new ChatMessage(ChatRole.User, prompt));
 
         var response = await ExecutePrompt(session);
@@ -68,7 +76,7 @@ internal partial class PromptingService
 
     private async Task<Microsoft.Extensions.AI.ChatResponse> ExecutePrompt(ChatSession session)
     {
-        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>(), _toolMode);
+        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>(), _toolMode, _temperature);
         var response = await _chatClient.GetResponseAsync(session.History, chatOptions);
         return response;
     }

@@ -15,9 +15,15 @@ public static class ChatClientHelper
     /// </summary>
     /// <param name="tools">Optional tools/functions to make available</param>
     /// <param name="toolMode">The tool mode to use (Auto, None). Defaults to Auto.</param>
-    public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null, ChatToolMode? toolMode = null)
+    /// <param name="temperature">Sampling temperature (0 = deterministic). Defaults to null (provider default).</param>
+    public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null, ChatToolMode? toolMode = null, float? temperature = null)
     {
         var options = new ChatOptions();
+
+        if (temperature.HasValue)
+        {
+            options.Temperature = temperature.Value;
+        }
 
         if (tools != null)
         {

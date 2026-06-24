@@ -105,11 +105,21 @@ public class FunctionCallingModel : PageModel
         return RedirectToPage();
     }
 
+    private const string StrictSystemPrompt =
+        "You are a strict assistant for a function-calling demo. " +
+        "Only answer questions if you can use a provided tool to obtain the data. " +
+        "If no tool can provide the answer (for example: current date, current time, " +
+        "live data, or anything you cannot verify), you MUST reply exactly: " +
+        "\"I cannot answer this without an appropriate tool.\" " +
+        "Do not guess. Do not use training data. Do not estimate.";
+
     private async Task EnsureChatServiceSetupAsync()
     {
         _chatService.SetToolMode(SelectedToolMode);
         _chatService.SetFunctionCallingMode(FunctionCallingMode.Local);
         _chatService.SetApprovalMode(ApprovalMode.Auto);
+        _chatService.SetTemperature(0f);
+        _chatService.SetSystemPrompt(StrictSystemPrompt);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
 }
