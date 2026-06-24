@@ -32,8 +32,11 @@ public class FunctionCallingModel : PageModel
         _ => ChatToolMode.Auto
     };
 
+    [BindProperty]
     public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
-    public string? ErrorMessage { get; private set; }
+    
+    [BindProperty]
+    public string? ErrorMessage { get; set; }
 
     public FunctionCallingModel(ILogger<FunctionCallingModel> logger,
         IHttpClientFactory clientFactory,
@@ -56,7 +59,9 @@ public class FunctionCallingModel : PageModel
     {
         if (!ModelState.IsValid)
         {
-            return OnGet();
+            ErrorMessage = "Model validation failed.";
+            _logger.LogWarning("Model state invalid: {errors}", string.Join("; ", ModelState.Values.SelectMany(v => v.Errors)));
+            return Page();
         }
 
         try
@@ -64,14 +69,19 @@ public class FunctionCallingModel : PageModel
             await EnsureChatServiceSetupAsync();
             var userKey = GetUserKey();
 
+            _logger.LogInformation("Processing prompt: {Prompt} with ToolMode: {ToolMode}", Prompt, SelectedToolModeValue);
             var response = await _chatService.BeginChatAsync(userKey, Prompt);
+            
             PromptResults = response.FinalAnswer;
-            PendingFunctions = response.PendingFunctions;
+            PendingFunctions = response.PendingFunctions ?? new();
+            
+            _logger.LogInformation("Response received: {FinalAnswer}, PendingFunctions: {Count}", 
+                response.FinalAnswer, response.PendingFunctions?.Count ?? 0);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
-            _logger.LogError(ex, "Error processing prompt");
+            ErrorMessage = $"Error: {ex.Message}";
+            _logger.LogError(ex, "Error processing prompt: {Message}", ex.Message);
         }
 
         return Page();
@@ -80,6 +90,9 @@ public class FunctionCallingModel : PageModel
     public IActionResult OnPostClear()
     {
         _chatService.Clear(GetUserKey());
+        PendingFunctions = new();
+        PromptResults = null;
+        ErrorMessage = null;
         return RedirectToPage();
     }
 

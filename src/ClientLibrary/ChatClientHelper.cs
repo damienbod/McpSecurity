@@ -14,7 +14,7 @@ public static class ChatClientHelper
     /// Creates ChatOptions for the AI chat client
     /// </summary>
     /// <param name="tools">Optional tools/functions to make available</param>
-    /// <param name="toolMode">The tool mode to use (Auto, RequiredAny, None). Defaults to Auto.</param>
+    /// <param name="toolMode">The tool mode to use (Auto, None). Defaults to Auto.</param>
     public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null, ChatToolMode? toolMode = null)
     {
         var options = new ChatOptions();
