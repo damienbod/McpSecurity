@@ -24,7 +24,13 @@ public class FunctionCallingModel : PageModel
 
     [BindProperty]
     [Required]
-    public ChatToolMode SelectedToolMode { get; set; } = ChatToolMode.Auto;
+    public string SelectedToolModeValue { get; set; } = "Auto";
+
+    public ChatToolMode SelectedToolMode => SelectedToolModeValue switch
+    {
+        "None" => ChatToolMode.None,
+        _ => ChatToolMode.Auto
+    };
 
     public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
     public string? ErrorMessage { get; private set; }

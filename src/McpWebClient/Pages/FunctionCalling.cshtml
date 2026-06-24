@@ -28,9 +28,9 @@
                             <label class="form-label fw-semibold mb-2">Tool Mode:</label>
                         </div>
                         <div class="col-auto">
-                            <select class="form-select form-select-sm" id="SelectedToolMode" name="SelectedToolMode" asp-for="SelectedToolMode">
-                                <option value="@ChatToolMode.Auto" selected="@(Model.SelectedToolMode == ChatToolMode.Auto)">Auto (Model decides)</option>
-                                <option value="@ChatToolMode.None" selected="@(Model.SelectedToolMode == ChatToolMode.None)">None (No tools)</option>
+                            <select class="form-select form-select-sm" id="SelectedToolModeValue" name="SelectedToolModeValue">
+                                <option value="Auto" selected="@(Model.SelectedToolModeValue == "Auto")">Auto (Model decides)</option>
+                                <option value="None" selected="@(Model.SelectedToolModeValue == "None")">None (No tools)</option>
                             </select>
                         </div>
                     </div>
