@@ -42,6 +42,7 @@ public class ChatService
     private bool _initialized;
     private ApprovalMode _approvalMode = ApprovalMode.Auto;
     private FunctionCallingMode _functionCallingMode = FunctionCallingMode.Local;
+    private ChatToolMode _toolMode = ChatToolMode.Auto;
     private readonly ITokenAcquisition _tokenAcquisition;
 
     private PromptingService? _promptingService;
@@ -78,6 +79,15 @@ public class ChatService
         }
     }
 
+    public void SetToolMode(ChatToolMode mode)
+    {
+        if (_toolMode != mode)
+        {
+            _initialized = false;
+            _toolMode = mode;
+        }
+    }
+
     public async Task EnsureSetupAsync(IHttpClientFactory clientFactory)
     {
         if (_initialized) return;
@@ -100,7 +110,7 @@ public class ChatService
             _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
         }
 
-        _promptingService = new PromptingService(_chatClient, _tools);
+        _promptingService = new PromptingService(_chatClient, _tools, _toolMode);
         _initialized = true;
     }
 
@@ -164,9 +174,17 @@ public class ChatService
              "Generates a random number based on a date.")
     ];
 
+    private IList<AIFunction> GetDateToolOnly() => [
+        AIFunctionFactory.Create(
+             () => DateTime.UtcNow.ToString("o"),
+             "GetCurrentDateTime",
+             "Returns the current date and time in ISO 8601 format.")
+    ];
+
     private PromptingService Handler => _promptingService ?? throw new InvalidOperationException("Service not initialized");
 
     public Task<PromptResponse> BeginChatAsync(string userKey, string prompt) => Handler.BeginAsync(userKey, prompt);
     public Task<PromptResponse> ApproveFunctionAsync(string userKey, string functionId) => Handler.ApproveAsync(userKey, functionId);
     public Task<PromptResponse> DeclineFunctionAsync(string userKey, string functionId) => Handler.DeclineAsync(userKey, functionId);
+    public void Clear(string userKey) => Handler.ClearSession(userKey);
 }

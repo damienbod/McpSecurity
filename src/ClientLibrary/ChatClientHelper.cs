@@ -14,8 +14,8 @@ public static class ChatClientHelper
     /// Creates ChatOptions for the AI chat client
     /// </summary>
     /// <param name="tools">Optional tools/functions to make available</param>
-    /// <param name="autoInvokeTools">Whether to auto-invoke tools or return them for manual processing</param>
-    public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null)
+    /// <param name="toolMode">The tool mode to use (Auto, RequiredAny, None). Defaults to Auto.</param>
+    public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null, ChatToolMode? toolMode = null)
     {
         var options = new ChatOptions();
 
@@ -27,8 +27,7 @@ public static class ChatClientHelper
                 options.Tools.Add(tool);
             }
 
-            // Set tool mode - Auto means the model decides when to call tools
-            options.ToolMode = ChatToolMode.Auto;
+            options.ToolMode = toolMode ?? ChatToolMode.Auto;
 
         }
 

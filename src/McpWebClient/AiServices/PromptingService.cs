@@ -10,13 +10,15 @@ internal partial class PromptingService
 {
     private readonly IChatClient _chatClient;
     private readonly IList<AIFunction> _mcpTools;
+    private readonly ChatToolMode _toolMode;
 
     private static readonly ConcurrentDictionary<string, ChatSession> _sessions = new();
 
-    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools)
+    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools, ChatToolMode? toolMode = null)
     {
         _chatClient = chatClient;
         _mcpTools = mcpTools;
+        _toolMode = toolMode ?? ChatToolMode.Auto;
     }
 
     public async Task<PromptResponse> BeginAsync(string userKey, string prompt)
@@ -54,7 +56,7 @@ internal partial class PromptingService
 
     private async Task<Microsoft.Extensions.AI.ChatResponse> ExecutePrompt(ChatSession session)
     {
-        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>());
+        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>(), _toolMode);
         var response = await _chatClient.GetResponseAsync(session.History, chatOptions);
         return response;
     }
@@ -122,6 +124,8 @@ internal partial class PromptingService
     }
 
     private void Clear(string userKey) => _sessions.TryRemove(userKey, out _);
+
+    public void ClearSession(string userKey) => Clear(userKey);
 
     private static List<PendingFunctionCall> Project(ChatSession session)
     {

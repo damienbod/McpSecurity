@@ -62,6 +62,9 @@ public class Program
         app.MapControllers();
         app.MapHub<ElicitationHub>("/hubs/elicitation");
 
+        // Redirect root to FunctionCalling page
+        app.MapGet("/", () => Results.Redirect("/FunctionCalling"));
+
         app.Run();
     }
 }

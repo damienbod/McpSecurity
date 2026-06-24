@@ -1,0 +1,145 @@
+@page
+@model FunctionCallingModel
+@using Microsoft.Extensions.AI
+@{
+    ViewData["Title"] = "Function Calling Test";
+    var hasPendingFunctions = Model.PendingFunctions.Any();
+}
+
+<div class="row g-3">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEFT – Chat Panel with ToolMode Selector
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">📅 Function Calling Test</span>
+                <form method="post" asp-page-handler="Clear" class="mb-0">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Clear</button>
+                </form>
+            </div>
+            <div class="card-body d-flex flex-column" style="min-height:520px;">
+
+                <!-- ToolMode Selector -->
+                <form method="post" asp-page="FunctionCalling" class="mb-3 pb-3 border-bottom">
+                    <div class="row g-2">
+                        <div class="col-auto">
+                            <label class="form-label fw-semibold mb-2">Tool Mode:</label>
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" id="SelectedToolMode" name="SelectedToolMode" asp-for="SelectedToolMode">
+                                <option value="@ChatToolMode.Auto" selected="@(Model.SelectedToolMode == ChatToolMode.Auto)">Auto (Model decides)</option>
+                                <option value="@ChatToolMode.None" selected="@(Model.SelectedToolMode == ChatToolMode.None)">None (No tools)</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Prompt Input -->
+                <form method="post" class="mt-auto">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Prompt:</label>
+                        <textarea class="form-control" rows="4" name="Prompt"
+                                  placeholder="Ask something like: What is the current date?"
+                                  asp-for="Prompt"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send Prompt</button>
+                </form>
+
+                <!-- Error Message -->
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger small py-2 mt-3">@Model.ErrorMessage</div>
+                }
+
+                <!-- Results -->
+                @if (!string.IsNullOrEmpty(Model.PromptResults))
+                {
+                    <div class="alert alert-info small py-2 mt-3 mb-0">
+                        <strong>Response:</strong>
+                        <div class="mt-2">@Model.PromptResults</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         RIGHT – Tool Calls Panel
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">🔧 DateTool Calls</div>
+            <div class="card-body" style="max-height:600px; overflow-y:auto;">
+                @if (!hasPendingFunctions)
+                {
+                    <p class="text-muted fst-italic small mb-0">Tool calls will appear here after sending a prompt.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var call in Model.PendingFunctions)
+                        {
+                            <div class="border rounded p-3 bg-light">
+                                <div class="fw-semibold small mb-2">📍 @call.FunctionName</div>
+                                @if (!string.IsNullOrWhiteSpace(call.ArgumentsJson))
+                                {
+                                    <div class="mb-2">
+                                        <small class="text-muted">Arguments:</small>
+                                        <pre class="bg-white p-2 rounded mb-0" style="font-size:0.75rem; max-height:150px; overflow-y:auto;">@call.ArgumentsJson</pre>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <small class="text-muted d-block mb-2">No arguments</small>
+                                }
+                                <div class="text-muted small">
+                                    <code>ID: @call.Id</code>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Information Panel
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">ℹ️ Tool Mode Explanation</div>
+            <div class="card-body py-2">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>
+                            <strong class="text-primary">Auto</strong>
+                            <small class="d-block text-muted">The model decides whether to call tools or respond directly. Useful for flexible interactions.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <strong class="text-secondary">None</strong>
+                            <small class="d-block text-muted">The model cannot use tools. Only text-based responses allowed.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-update tool mode when selector changes
+        document.getElementById('SelectedToolMode')?.addEventListener('change', function() {
+            // Optional: You could submit form on change for real-time updates
+            // this.closest('form').submit();
+        });
+    </script>
+}
