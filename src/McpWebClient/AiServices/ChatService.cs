@@ -43,7 +43,6 @@ public class ChatService
     private ApprovalMode _approvalMode = ApprovalMode.Auto;
     private FunctionCallingMode _functionCallingMode = FunctionCallingMode.Local;
     private ChatToolMode _toolMode = ChatToolMode.Auto;
-    private float? _temperature;
     private string? _systemPrompt;
     private readonly ITokenAcquisition _tokenAcquisition;
 
@@ -90,15 +89,6 @@ public class ChatService
         }
     }
 
-    public void SetTemperature(float? temperature)
-    {
-        if (_temperature != temperature)
-        {
-            _initialized = false;
-            _temperature = temperature;
-        }
-    }
-
     public void SetSystemPrompt(string? systemPrompt)
     {
         if (_systemPrompt != systemPrompt)
@@ -128,7 +118,7 @@ public class ChatService
             _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
         }
 
-        _promptingService = new PromptingService(_chatClient, _tools, _toolMode, _temperature, _systemPrompt);
+        _promptingService = new PromptingService(_chatClient, _tools, _toolMode, _systemPrompt);
         _initialized = true;
     }
 
