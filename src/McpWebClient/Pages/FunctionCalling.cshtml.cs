@@ -118,7 +118,8 @@ public class FunctionCallingModel : PageModel
         _chatService.SetToolMode(SelectedToolMode);
         _chatService.SetFunctionCallingMode(FunctionCallingMode.Local);
         _chatService.SetApprovalMode(ApprovalMode.Auto);
-        _chatService.SetTemperature(0f);
+        // Note: Temperature is intentionally NOT set — reasoning models (o1/o3/gpt-5)
+        // only support the default value. Determinism is enforced via the system prompt.
         _chatService.SetSystemPrompt(StrictSystemPrompt);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
