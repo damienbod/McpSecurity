@@ -92,8 +92,6 @@ public class ChatService
     {
         if (_initialized) return;
 
-
-
         if (_functionCallingMode == FunctionCallingMode.Local)
         {
             _tools = GetLocalTools();

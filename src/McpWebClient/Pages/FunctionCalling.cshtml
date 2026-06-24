@@ -29,26 +29,19 @@
                     </div>
                 }
 
-                <!-- ToolMode Selector -->
-                <form method="post" asp-page="FunctionCalling" class="mb-3 pb-3 border-bottom">
-                    <div class="row g-2">
-                        <div class="col-auto">
-                            <label class="form-label fw-semibold mb-2">Tool Mode:</label>
-                        </div>
-                        <div class="col-auto">
-                            <select class="form-select form-select-sm" id="SelectedToolModeValue" name="SelectedToolModeValue">
-                                <option value="Auto" selected="@(Model.SelectedToolModeValue == "Auto")">Auto (Model decides)</option>
-                                <option value="None" selected="@(Model.SelectedToolModeValue == "None")">None (No tools)</option>
-                            </select>
-                        </div>
+                <!-- Single combined form: ToolMode + Prompt -->
+                <form method="post" asp-page="FunctionCalling">
+                    <div class="mb-3 pb-3 border-bottom">
+                        <label class="form-label fw-semibold mb-2" for="SelectedToolModeValue">Tool Mode:</label>
+                        <select class="form-select form-select-sm" id="SelectedToolModeValue" name="SelectedToolModeValue" asp-for="SelectedToolModeValue">
+                            <option value="Auto">Auto (Model decides)</option>
+                            <option value="None">None (No tools)</option>
+                        </select>
                     </div>
-                </form>
 
-                <!-- Prompt Input -->
-                <form method="post" class="mt-auto">
                     <div class="mb-2">
-                        <label class="form-label fw-semibold">Prompt:</label>
-                        <textarea class="form-control" rows="4" name="Prompt"
+                        <label class="form-label fw-semibold" asp-for="Prompt">Prompt:</label>
+                        <textarea class="form-control" rows="4"
                                   placeholder="Ask something like: What is the current date?"
                                   asp-for="Prompt"></textarea>
                     </div>

@@ -15,7 +15,6 @@ public class FunctionCallingModel : PageModel
     private readonly ChatService _chatService;
     private readonly IHttpClientFactory _clientFactory;
 
-    [BindProperty]
     public string? PromptResults { get; set; }
 
     [BindProperty]
@@ -32,10 +31,8 @@ public class FunctionCallingModel : PageModel
         _ => ChatToolMode.Auto
     };
 
-    [BindProperty]
     public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
     
-    [BindProperty]
     public string? ErrorMessage { get; set; }
 
     public FunctionCallingModel(ILogger<FunctionCallingModel> logger,
