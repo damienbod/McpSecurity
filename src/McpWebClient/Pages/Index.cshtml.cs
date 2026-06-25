@@ -23,10 +23,6 @@ public class IndexModel : PageModel
 
     [BindProperty]
     [Required]
-    public FunctionCallingMode SelectedFunctionCallingMode { get; set; } = FunctionCallingMode.Local;
-
-    [BindProperty]
-    [Required]
     public ApprovalMode SelectedMode { get; set; } = ApprovalMode.Auto;
 
     public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
@@ -88,7 +84,8 @@ public class IndexModel : PageModel
     private async Task EnsureChatServiceSetupAsync()
     {
         _chatService.SetApprovalMode(SelectedMode);
-        _chatService.SetFunctionCallingMode(SelectedFunctionCallingMode);
+        // Always uses Confidential OIDC MCP (McpSecure) — token acquired via ITokenAcquisition
+        _chatService.SetFunctionCallingMode(FunctionCallingMode.McpSecure);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
 

@@ -14,11 +14,11 @@ namespace McpWebClient;
 
 public enum ApprovalMode
 {
-    [Display(Name = "Auto (no human approval)")]
+    [Display(Name = "MEAI Auto-Invoke (no human approval)")]
     Auto,
-    [Display(Name = "Manual Approval")]
+    [Display(Name = "Human Gate (approve / decline each tool call)")]
     Manual,
-    [Display(Name = "Elicitation Approval")]
+    [Display(Name = "Elicitation (MEAI auto-invoke + structured human input)")]
     Elicitation
 }
 

@@ -3,23 +3,29 @@
 @{
     ViewData["Title"] = "MCP Auth Demo";
 }
+@* This page always connects via Confidential OIDC MCP (McpSecure).
+   The access token is acquired via ITokenAcquisition (Microsoft.Identity.Web)
+   and sent as a Bearer token to the HttpMcpServer. *@
+
+<!-- Transport badge -->
+<div class="alert alert-secondary d-flex align-items-center gap-2 py-2 mb-3" role="alert">
+    <span class="badge bg-dark">🔒 Confidential OIDC MCP</span>
+    <small class="text-muted">Token acquired via <code>ITokenAcquisition</code> and forwarded to the MCP server as a Bearer token.</small>
+</div>
 
 <!-- Explicit asp-page to avoid inheriting any existing ?handler=Approve query when reusing page URL -->
 <form method="post" asp-page="Index">
     <div class="mb-3">
-        <label class="form-label" for="SelectedFunctionCallingMode">Function Calling Mode:</label>
-        <select class="form-select" id="SelectedFunctionCallingMode" name="SelectedFunctionCallingMode"
-                asp-for="SelectedFunctionCallingMode"
-                asp-items="Html.GetEnumSelectList<FunctionCallingMode>()"></select>
-        <span asp-validation-for="SelectedFunctionCallingMode" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label" for="SelectedMode">Approval Mode:</label>
+        <label class="form-label" for="SelectedMode">Tool Invocation Mode:</label>
         <select class="form-select" id="SelectedMode" name="SelectedMode"
                 asp-for="SelectedMode"
                 asp-items="Html.GetEnumSelectList<ApprovalMode>()"></select>
         <span asp-validation-for="SelectedMode" class="text-danger"></span>
+        <div class="form-text">
+            <strong>MEAI Auto-Invoke</strong> — the MEAI <code>UseFunctionInvocation()</code> middleware calls all tools automatically and returns the final answer.<br />
+            <strong>Human Gate</strong> — MEAI returns raw tool-call requests; you approve or decline each one individually below.<br />
+            <strong>Elicitation</strong> — MEAI auto-invokes tools but may pause to collect structured user input via MCP Elicitation forms.
+        </div>
     </div>
 
     <div class="mb-3 mt-3">
@@ -38,9 +44,9 @@
 @if (Model.PendingFunctions.Any())
 {
     <div class="card mt-4">
-        <div class="card-header">Pending Tool Approvals (@Model.PendingFunctions.Count)</div>
+        <div class="card-header">⏳ Awaiting Human Gate — @Model.PendingFunctions.Count tool call(s) pending</div>
         <div class="card-body">
-            <p>The model requested the following tool calls. Approve or decline individually.</p>
+            <p class="text-muted small mb-3">The model requested the following tool calls. Approve to execute them, or decline to cancel.</p>
             <ul class="list-group">
                 @foreach (var f in Model.PendingFunctions)
                 {
@@ -54,14 +60,12 @@
                                 <form method="post" asp-page-handler="Approve" asp-route-functionId="@f.Id" class="d-inline">
                                     <input type="hidden" name="Prompt" value="@Model.Prompt" />
                                     <input type="hidden" name="SelectedMode" value="@Model.SelectedMode" />
-                                    <input type="hidden" name="SelectedFunctionCallingMode" value="@Model.SelectedFunctionCallingMode" />
-                                    <button type="submit" class="btn btn-sm btn-success me-1">Approve</button>
+                                    <button type="submit" class="btn btn-sm btn-success me-1">✔ Approve</button>
                                 </form>
                                 <form method="post" asp-page-handler="Decline" asp-route-functionId="@f.Id" class="d-inline">
                                     <input type="hidden" name="Prompt" value="@Model.Prompt" />
                                     <input type="hidden" name="SelectedMode" value="@Model.SelectedMode" />
-                                    <input type="hidden" name="SelectedFunctionCallingMode" value="@Model.SelectedFunctionCallingMode" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                                    <button type="submit" class="btn btn-sm btn-danger">✖ Decline</button>
                                 </form>
                             </div>
                         </div>
