@@ -3,6 +3,7 @@ using System.Security.Claims;
 using McpWebClient.AiServices.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.AI;
 using Microsoft.Identity.Web;
 
 namespace McpWebClient.Pages;
@@ -86,6 +87,9 @@ public class IndexModel : PageModel
         _chatService.SetApprovalMode(SelectedMode);
         // Always uses Confidential OIDC MCP (McpSecure) — token acquired via ITokenAcquisition
         _chatService.SetFunctionCallingMode(FunctionCallingMode.McpSecure);
+        _chatService.SetToolMode(SelectedMode is ApprovalMode.Manual or ApprovalMode.Elicitation
+            ? ChatToolMode.RequireAny
+            : ChatToolMode.Auto);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
 

@@ -16,9 +16,9 @@ public enum ApprovalMode
 {
     [Display(Name = "MEAI Auto-Invoke (no human approval)")]
     Auto,
-    [Display(Name = "Human Gate (approve / decline each tool call)")]
+    [Display(Name = "MEAI Human-in-the-loop (approve / decline each tool call)")]
     Manual,
-    [Display(Name = "Elicitation (MEAI auto-invoke + structured human input)")]
+    [Display(Name = "MCP Human in the loop (Eliciation)")]
     Elicitation
 }
 

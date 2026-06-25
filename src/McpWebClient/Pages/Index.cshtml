@@ -22,8 +22,8 @@
         <span asp-validation-for="SelectedMode" class="text-danger"></span>
         <div class="form-text">
             <strong>MEAI Auto-Invoke</strong> — the MEAI <code>UseFunctionInvocation()</code> middleware calls all tools automatically and returns the final answer.<br />
-            <strong>Human Gate</strong> — MEAI returns raw tool-call requests; you approve or decline each one individually below.<br />
-            <strong>Elicitation</strong> — MEAI auto-invokes tools but may pause to collect structured user input via MCP Elicitation forms.
+            <strong>MEAI Human-in-the-loop</strong> — MEAI returns raw tool-call requests; you approve or decline each call explicitly in this page.<br />
+            <strong>MCP Human in the loop (Eliciation)</strong> — MEAI auto-invokes tools, but each tool execution requests approval via MCP Elicitation before it proceeds.
         </div>
     </div>
 
@@ -43,7 +43,7 @@
 @if (Model.PendingFunctions.Any())
 {
     <div class="card mt-4">
-        <div class="card-header">⏳ Awaiting Human Gate — @Model.PendingFunctions.Count tool call(s) pending</div>
+        <div class="card-header">⏳ Awaiting MEAI Human-in-the-loop — @Model.PendingFunctions.Count tool call(s) pending</div>
         <div class="card-body">
             <p class="text-muted small mb-3">The model requested the following tool calls. Approve to execute them, or decline to cancel.</p>
             <ul class="list-group">
