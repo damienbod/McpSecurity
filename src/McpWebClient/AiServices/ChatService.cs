@@ -36,7 +36,7 @@ public class ChatService
 {
     private readonly IConfiguration _configuration;
     private readonly ElicitationCoordinator _elicitationCoordinator;
-    private IChatClient _chatClient;
+    private readonly IChatClient _baseChatClient;
     private IList<AIFunction> _tools = [];
     private McpClient _mcpClient = null!;
     private bool _initialized;
@@ -58,7 +58,7 @@ public class ChatService
             .AddEnvironmentVariables()
             .Build();
 
-        _chatClient = ChatClientHelper.GetChatClient(config);
+        _baseChatClient = ChatClientHelper.GetChatClient(config);
         _tokenAcquisition = tokenAcquisition;
     }
 
@@ -112,13 +112,15 @@ public class ChatService
             _tools = await _mcpClient.GetMcpToolsAsAIFunctionsAsync();
         }
 
+        var chatClient = _baseChatClient;
+
         // Wrap chat client with function invocation if using elicitation or auto mode (auto-invoke)
         if (_approvalMode is ApprovalMode.Elicitation or ApprovalMode.Auto)
         {
-            _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
+            chatClient = new ChatClientBuilder(chatClient).UseFunctionInvocation().Build();
         }
 
-        _promptingService = new PromptingService(_chatClient, _tools, _toolMode, _systemPrompt);
+        _promptingService = new PromptingService(chatClient, _tools, _toolMode, _systemPrompt);
         _initialized = true;
     }
 

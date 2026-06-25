@@ -13,8 +13,7 @@
     <small class="text-muted">Token acquired via <code>ITokenAcquisition</code> and forwarded to the MCP server as a Bearer token.</small>
 </div>
 
-<!-- Explicit asp-page to avoid inheriting any existing ?handler=Approve query when reusing page URL -->
-<form method="post" asp-page="Index">
+<form method="post">
     <div class="mb-3">
         <label class="form-label" for="SelectedMode">Tool Invocation Mode:</label>
         <select class="form-select" id="SelectedMode" name="SelectedMode"
