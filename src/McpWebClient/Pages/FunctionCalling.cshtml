@@ -34,9 +34,17 @@
                     <div class="mb-3 pb-3 border-bottom">
                         <label class="form-label fw-semibold mb-2" for="SelectedToolModeValue">Tool Mode:</label>
                         <select class="form-select form-select-sm" id="SelectedToolModeValue" name="SelectedToolModeValue" asp-for="SelectedToolModeValue">
-                            <option value="Auto">Auto (Model decides)</option>
                             <option value="None">None (No tools)</option>
+                            <option value="Auto">Auto (Model decides)</option>
+                            <option value="RequireAny">RequireAny (Must use a tool)</option>
                         </select>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="DisableSystemPrompt" asp-for="DisableSystemPrompt" />
+                            <label class="form-check-label small" for="DisableSystemPrompt">
+                                Disable system prompt (send empty system prompt)
+                            </label>
+                        </div>
                     </div>
 
                     <div class="mb-2">
@@ -103,38 +111,5 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     Information Panel
+     (Tool Mode Explanation panel removed)
      ═══════════════════════════════════════════════════════════════════════ -->
-<div class="row mt-3">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header fw-semibold">ℹ️ Tool Mode Explanation</div>
-            <div class="card-body py-2">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div>
-                            <strong class="text-primary">Auto</strong>
-                            <small class="d-block text-muted">The model decides whether to call tools or respond directly. Useful for flexible interactions.</small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div>
-                            <strong class="text-secondary">None</strong>
-                            <small class="d-block text-muted">The model cannot use tools. Only text-based responses allowed.</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Auto-update tool mode when selector changes
-        document.getElementById('SelectedToolMode')?.addEventListener('change', function() {
-            // Optional: You could submit form on change for real-time updates
-            // this.closest('form').submit();
-        });
-    </script>
-}

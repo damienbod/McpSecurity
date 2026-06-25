@@ -23,13 +23,17 @@ public class FunctionCallingModel : PageModel
 
     [BindProperty]
     [Required]
-    public string SelectedToolModeValue { get; set; } = "Auto";
+    public string SelectedToolModeValue { get; set; } = "None";
 
     public ChatToolMode SelectedToolMode => SelectedToolModeValue switch
     {
         "None" => ChatToolMode.None,
+        "RequireAny" => ChatToolMode.RequireAny,
         _ => ChatToolMode.Auto
     };
+
+    [BindProperty]
+    public bool DisableSystemPrompt { get; set; }
 
     public List<PendingFunctionCall> PendingFunctions { get; set; } = new();
     
@@ -120,7 +124,7 @@ public class FunctionCallingModel : PageModel
         _chatService.SetApprovalMode(ApprovalMode.Auto);
         // Note: Temperature is intentionally NOT set — reasoning models (o1/o3/gpt-5)
         // only support the default value. Determinism is enforced via the system prompt.
-        _chatService.SetSystemPrompt(StrictSystemPrompt);
+        _chatService.SetSystemPrompt(DisableSystemPrompt ? null : StrictSystemPrompt);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
 }
