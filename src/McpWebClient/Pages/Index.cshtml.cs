@@ -87,9 +87,7 @@ public class IndexModel : PageModel
         _chatService.SetApprovalMode(SelectedMode);
         // Always uses Confidential OIDC MCP (McpSecure) — token acquired via ITokenAcquisition
         _chatService.SetFunctionCallingMode(FunctionCallingMode.McpSecure);
-        _chatService.SetToolMode(SelectedMode is ApprovalMode.Manual or ApprovalMode.Elicitation
-            ? ChatToolMode.RequireAny
-            : ChatToolMode.Auto);
+        _chatService.SetToolMode(ChatToolMode.Auto);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
 
