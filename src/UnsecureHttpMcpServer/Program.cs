@@ -10,10 +10,7 @@ builder.Services.AddTransient<SalesTools>();
 
 builder.Services
        .AddMcpServer()
-       .WithHttpTransport(options =>
-       {
-           options.Stateless = true;
-       })
+       .WithHttpTransport()
        .WithPrompts<PromptExamples>()
        .WithResources<DocumentationResource>()
        .WithTools<RandomNumberTools>()

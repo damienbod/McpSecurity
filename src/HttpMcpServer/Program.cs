@@ -32,16 +32,13 @@ builder.Services.AddSingleton<SalesDataStore>();
 builder.Services.AddTransient<SalesTools>();
 
 builder.Services
-       .AddMcpServer()
-    .WithHttpTransport(options =>
-    {
-        options.Stateless = true;
-    })
-       .WithPrompts<PromptExamples>()
-       .WithResources<DocumentationResource>()
-       .WithTools<RandomNumberTools>()
-       .WithTools<DateTools>()
-       .WithTools<SalesTools>();
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithPrompts<PromptExamples>()
+    .WithResources<DocumentationResource>()
+    .WithTools<RandomNumberTools>()
+    .WithTools<DateTools>()
+    .WithTools<SalesTools>();
 
 // Add CORS for HTTP transport support in browsers
 builder.Services.AddCors(options =>
