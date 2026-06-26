@@ -1,0 +1,115 @@
+@page
+@model FunctionCallingModel
+@using Microsoft.Extensions.AI
+@{
+    ViewData["Title"] = "Function Calling Test";
+    var hasPendingFunctions = Model.PendingFunctions.Any();
+}
+
+<div class="row g-3">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEFT – Chat Panel with ToolMode Selector
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">📅 Function Calling Test</span>
+                <form method="post" asp-page-handler="Clear" class="mb-0">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Clear</button>
+                </form>
+            </div>
+            <div class="card-body d-flex flex-column" style="min-height:520px;">
+
+                <!-- Error Message -->
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger small py-2 mb-3">
+                        <strong>⚠️ Error:</strong> @Model.ErrorMessage
+                    </div>
+                }
+
+                <!-- Single combined form: ToolMode + Prompt -->
+                <form method="post" asp-page="FunctionCalling">
+                    <div class="mb-3 pb-3 border-bottom">
+                        <label class="form-label fw-semibold mb-2" for="SelectedToolModeValue">Tool Mode:</label>
+                        <select class="form-select form-select-sm" id="SelectedToolModeValue" name="SelectedToolModeValue" asp-for="SelectedToolModeValue">
+                            <option value="None">None (No tools)</option>
+                            <option value="Auto">Auto (Model decides)</option>
+                            <option value="RequireAny">RequireAny (Must use a tool)</option>
+                        </select>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="DisableSystemPrompt" asp-for="DisableSystemPrompt" />
+                            <label class="form-check-label small" for="DisableSystemPrompt">
+                                Disable system prompt (send empty system prompt)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" asp-for="Prompt">Prompt:</label>
+                        <textarea class="form-control" rows="4"
+                                  placeholder="Ask something like: What is the current date?"
+                                  asp-for="Prompt"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send Prompt</button>
+                </form>
+
+                <!-- Results -->
+                @if (!string.IsNullOrEmpty(Model.PromptResults))
+                {
+                    <div class="alert alert-info small py-2 mt-3 mb-0">
+                        <strong>📝 Response:</strong>
+                        <div class="mt-2" style="white-space: pre-wrap;">@Model.PromptResults</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         RIGHT – Tool Calls Panel
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">🔧 Function Calls</div>
+            <div class="card-body" style="max-height:600px; overflow-y:auto;">
+                @if (!hasPendingFunctions)
+                {
+                    <p class="text-muted fst-italic small mb-0">Tool calls will appear here after sending a prompt.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var call in Model.PendingFunctions)
+                        {
+                            <div class="border rounded p-3 bg-light">
+                                <div class="fw-semibold small mb-2">📍 @call.FunctionName</div>
+                                @if (!string.IsNullOrWhiteSpace(call.ArgumentsJson))
+                                {
+                                    <div class="mb-2">
+                                        <small class="text-muted">Arguments:</small>
+                                        <pre class="bg-white p-2 rounded mb-0" style="font-size:0.75rem; max-height:150px; overflow-y:auto;">@call.ArgumentsJson</pre>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <small class="text-muted d-block mb-2">No arguments</small>
+                                }
+                                <div class="text-muted small">
+                                    <code>ID: @call.Id</code>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     (Tool Mode Explanation panel removed)
+     ═══════════════════════════════════════════════════════════════════════ -->

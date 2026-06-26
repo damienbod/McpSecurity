@@ -10,18 +10,26 @@ internal partial class PromptingService
 {
     private readonly IChatClient _chatClient;
     private readonly IList<AIFunction> _mcpTools;
+    private readonly ChatToolMode _toolMode;
+    private readonly string? _systemPrompt;
 
     private static readonly ConcurrentDictionary<string, ChatSession> _sessions = new();
 
-    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools)
+    public PromptingService(IChatClient chatClient, IList<AIFunction> mcpTools, ChatToolMode? toolMode = null, string? systemPrompt = null)
     {
         _chatClient = chatClient;
         _mcpTools = mcpTools;
+        _toolMode = toolMode ?? ChatToolMode.Auto;
+        _systemPrompt = systemPrompt;
     }
 
     public async Task<PromptResponse> BeginAsync(string userKey, string prompt)
     {
         var session = _sessions[userKey] = new() { LastUpdatedUtc = DateTime.UtcNow };
+        if (!string.IsNullOrWhiteSpace(_systemPrompt))
+        {
+            session.History.Add(new ChatMessage(ChatRole.System, _systemPrompt));
+        }
         session.History.Add(new ChatMessage(ChatRole.User, prompt));
 
         var response = await ExecutePrompt(session);
@@ -31,10 +39,22 @@ internal partial class PromptingService
             .OfType<FunctionCallContent>()
             .ToArray() ?? [];
 
-        return ExtractFunctionsAndSyncSession(session, lastMessage, functionCalls);
+        // Collect all function calls executed across the response messages
+        // (relevant for auto-invoke scenarios where calls don't surface as pending)
+        var executedCalls = response.Messages
+            .SelectMany(m => m.Contents.OfType<FunctionCallContent>())
+            .Where(fc => !functionCalls.Any(p => p.CallId == fc.CallId))
+            .Select(fc => new PendingFunctionCall(
+                fc.CallId,
+                fc.Name,
+                string.Empty,
+                fc.Arguments != null ? JsonSerializer.Serialize(fc.Arguments) : string.Empty))
+            .ToList();
+
+        return ExtractFunctionsAndSyncSession(session, lastMessage, functionCalls, executedCalls);
     }
 
-    private static PromptResponse ExtractFunctionsAndSyncSession(ChatSession session, ChatMessage? lastMessage, FunctionCallContent[] functionCalls)
+    private static PromptResponse ExtractFunctionsAndSyncSession(ChatSession session, ChatMessage? lastMessage, FunctionCallContent[] functionCalls, List<PendingFunctionCall> executedCalls)
     {
         if (functionCalls.Length > 0 && lastMessage != null)
         {
@@ -44,17 +64,17 @@ internal partial class PromptingService
                 session.PendingCalls[call.CallId] = call;
             }
             session.LastUpdatedUtc = DateTime.UtcNow;
-            return new PromptResponse(null, Project(session));
+            return new PromptResponse(null, Project(session), executedCalls);
         }
 
         session.FinalAnswer = lastMessage?.Text;
         session.LastUpdatedUtc = DateTime.UtcNow;
-        return new PromptResponse(session.FinalAnswer, new());
+        return new PromptResponse(session.FinalAnswer, new(), executedCalls);
     }
 
     private async Task<Microsoft.Extensions.AI.ChatResponse> ExecutePrompt(ChatSession session)
     {
-        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>());
+        var chatOptions = ChatClientHelper.CreateChatOptions(_mcpTools.Cast<AITool>(), _toolMode);
         var response = await _chatClient.GetResponseAsync(session.History, chatOptions);
         return response;
     }
@@ -112,7 +132,7 @@ internal partial class PromptingService
             .OfType<FunctionCallContent>()
             .ToArray() ?? [];
 
-        return ExtractFunctionsAndSyncSession(session, lastMessage, moreCalls);
+        return ExtractFunctionsAndSyncSession(session, lastMessage, moreCalls, new());
     }
 
     public Task<PromptResponse> DeclineAsync(string userKey, string functionId)
@@ -122,6 +142,8 @@ internal partial class PromptingService
     }
 
     private void Clear(string userKey) => _sessions.TryRemove(userKey, out _);
+
+    public void ClearSession(string userKey) => Clear(userKey);
 
     private static List<PendingFunctionCall> Project(ChatSession session)
     {

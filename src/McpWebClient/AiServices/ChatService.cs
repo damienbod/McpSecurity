@@ -14,11 +14,11 @@ namespace McpWebClient;
 
 public enum ApprovalMode
 {
-    [Display(Name = "Auto (no human approval)")]
+    [Display(Name = "MEAI Auto-Invoke (no human approval)")]
     Auto,
-    [Display(Name = "Manual Approval")]
+    [Display(Name = "MEAI Human-in-the-loop (approve / decline each tool call)")]
     Manual,
-    [Display(Name = "Elicitation Approval")]
+    [Display(Name = "MCP Human in the loop (Eliciation)")]
     Elicitation
 }
 
@@ -36,12 +36,14 @@ public class ChatService
 {
     private readonly IConfiguration _configuration;
     private readonly ElicitationCoordinator _elicitationCoordinator;
-    private IChatClient _chatClient;
+    private readonly IChatClient _baseChatClient;
     private IList<AIFunction> _tools = [];
     private McpClient _mcpClient = null!;
     private bool _initialized;
     private ApprovalMode _approvalMode = ApprovalMode.Auto;
     private FunctionCallingMode _functionCallingMode = FunctionCallingMode.Local;
+    private ChatToolMode _toolMode = ChatToolMode.Auto;
+    private string? _systemPrompt;
     private readonly ITokenAcquisition _tokenAcquisition;
 
     private PromptingService? _promptingService;
@@ -56,7 +58,7 @@ public class ChatService
             .AddEnvironmentVariables()
             .Build();
 
-        _chatClient = ChatClientHelper.GetChatClient(config);
+        _baseChatClient = ChatClientHelper.GetChatClient(config);
         _tokenAcquisition = tokenAcquisition;
     }
 
@@ -78,11 +80,27 @@ public class ChatService
         }
     }
 
+    public void SetToolMode(ChatToolMode mode)
+    {
+        if (_toolMode != mode)
+        {
+            _initialized = false;
+            _toolMode = mode;
+        }
+    }
+
+    public void SetSystemPrompt(string? systemPrompt)
+    {
+        if (_systemPrompt != systemPrompt)
+        {
+            _initialized = false;
+            _systemPrompt = systemPrompt;
+        }
+    }
+
     public async Task EnsureSetupAsync(IHttpClientFactory clientFactory)
     {
         if (_initialized) return;
-
-
 
         if (_functionCallingMode == FunctionCallingMode.Local)
         {
@@ -94,13 +112,15 @@ public class ChatService
             _tools = await _mcpClient.GetMcpToolsAsAIFunctionsAsync();
         }
 
+        var chatClient = _baseChatClient;
+
         // Wrap chat client with function invocation if using elicitation or auto mode (auto-invoke)
         if (_approvalMode is ApprovalMode.Elicitation or ApprovalMode.Auto)
         {
-            _chatClient = new ChatClientBuilder(_chatClient).UseFunctionInvocation().Build();
+            chatClient = new ChatClientBuilder(chatClient).UseFunctionInvocation().Build();
         }
 
-        _promptingService = new PromptingService(_chatClient, _tools);
+        _promptingService = new PromptingService(chatClient, _tools, _toolMode, _systemPrompt);
         _initialized = true;
     }
 
@@ -164,9 +184,17 @@ public class ChatService
              "Generates a random number based on a date.")
     ];
 
+    private IList<AIFunction> GetDateToolOnly() => [
+        AIFunctionFactory.Create(
+             () => DateTime.UtcNow.ToString("o"),
+             "GetCurrentDateTime",
+             "Returns the current date and time in ISO 8601 format.")
+    ];
+
     private PromptingService Handler => _promptingService ?? throw new InvalidOperationException("Service not initialized");
 
     public Task<PromptResponse> BeginChatAsync(string userKey, string prompt) => Handler.BeginAsync(userKey, prompt);
     public Task<PromptResponse> ApproveFunctionAsync(string userKey, string functionId) => Handler.ApproveAsync(userKey, functionId);
     public Task<PromptResponse> DeclineFunctionAsync(string userKey, string functionId) => Handler.DeclineAsync(userKey, functionId);
+    public void Clear(string userKey) => _promptingService?.ClearSession(userKey);
 }

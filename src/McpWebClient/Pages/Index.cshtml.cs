@@ -3,6 +3,7 @@ using System.Security.Claims;
 using McpWebClient.AiServices.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.AI;
 using Microsoft.Identity.Web;
 
 namespace McpWebClient.Pages;
@@ -20,10 +21,6 @@ public class IndexModel : PageModel
     [BindProperty]
     [Required]
     public string Prompt { get; set; } = "Please generate a random number based from the current date";
-
-    [BindProperty]
-    [Required]
-    public FunctionCallingMode SelectedFunctionCallingMode { get; set; } = FunctionCallingMode.Local;
 
     [BindProperty]
     [Required]
@@ -88,7 +85,9 @@ public class IndexModel : PageModel
     private async Task EnsureChatServiceSetupAsync()
     {
         _chatService.SetApprovalMode(SelectedMode);
-        _chatService.SetFunctionCallingMode(SelectedFunctionCallingMode);
+        // Always uses Confidential OIDC MCP (McpSecure) — token acquired via ITokenAcquisition
+        _chatService.SetFunctionCallingMode(FunctionCallingMode.McpSecure);
+        _chatService.SetToolMode(ChatToolMode.Auto);
         await _chatService.EnsureSetupAsync(_clientFactory);
     }
 

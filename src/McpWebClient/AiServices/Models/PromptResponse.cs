@@ -1,3 +1,3 @@
 ﻿namespace McpWebClient.AiServices.Models;
 
-public record PromptResponse(string? FinalAnswer, List<PendingFunctionCall> PendingFunctions);
+public record PromptResponse(string? FinalAnswer, List<PendingFunctionCall> PendingFunctions, List<PendingFunctionCall>? ExecutedFunctions = null);
