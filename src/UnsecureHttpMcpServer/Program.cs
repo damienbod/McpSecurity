@@ -6,7 +6,6 @@ using ToolsLibrary.Tools;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<SalesDataStore>();
-builder.Services.AddTransient<SalesTools>();
 
 builder.Services
        .AddMcpServer()

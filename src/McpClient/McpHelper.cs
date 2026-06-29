@@ -89,13 +89,8 @@ public class McpHelper
            {
                Elicitation = new()
                {
-                   //Form = new(),
-                   Url = new(),
+                   Form = new(),
                },
-               Sampling = new()
-               {
-                   Context = new(),
-               }
            },
            Handlers = new()
            {
