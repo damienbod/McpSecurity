@@ -18,7 +18,10 @@ public static class ChatClientHelper
     public static ChatOptions CreateChatOptions(IEnumerable<AITool>? tools = null, ChatToolMode? toolMode = null)
     {
         var options = new ChatOptions();
-        if (tools != null)
+        var mode = toolMode ?? ChatToolMode.Auto;
+        
+        // Only add tools if the mode is not None
+        if (tools != null && mode != ChatToolMode.None)
         {
             foreach (var tool in tools)
             {
@@ -26,8 +29,7 @@ public static class ChatClientHelper
                 options.Tools.Add(tool);
             }
 
-            options.ToolMode = toolMode ?? ChatToolMode.Auto;
-
+            options.ToolMode = mode;
         }
 
         return options;
