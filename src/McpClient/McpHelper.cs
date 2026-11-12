@@ -95,20 +95,8 @@ public class McpHelper
            Handlers = new()
            {
                ElicitationHandler = HandleElicitationAsync,
-               SamplingHandler = HandleSamplingAsync,
            }
        };
-
-    private static async ValueTask<CreateMessageResult> HandleSamplingAsync(CreateMessageRequestParams? requestParams, IProgress<ProgressNotificationValue> progress, CancellationToken token)
-    {
-        // do some LLM call here
-        return new CreateMessageResult()
-        {
-            Content = [new TextContentBlock() { Text = Guid.NewGuid().ToString() }],
-            Model = "sample-model",
-            Role = Role.Assistant,
-        };
-    }
 
     public static ValueTask<ElicitResult> HandleElicitationAsync(ElicitRequestParams? requestParams, CancellationToken token)
     {

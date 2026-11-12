@@ -15,8 +15,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.3.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="4.3.0" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.18.0" />
   </ItemGroup>
 
 

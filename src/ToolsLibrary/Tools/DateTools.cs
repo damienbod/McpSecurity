@@ -1,4 +1,5 @@
-﻿using ModelContextProtocol.Server;
+﻿using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 using System.ComponentModel;
 
 namespace ToolsLibrary.Tools;
@@ -8,9 +9,10 @@ public class DateTools
 {
     [McpServerTool]
     [Description("Returns the current date and time in ISO 8601 format.")]
-    public Task<string> GetCurrentDateTime(McpServer mcpServer)
+    public string GetCurrentDateTime(McpServer mcpServer, RequestContext<CallToolRequestParams> context)
         => ElicitationHelper.InvokeEliciation(
             mcpServer,
+            context,
             nameof(GetCurrentDateTime),
             () => DateTime.UtcNow.ToString("o"));
 }

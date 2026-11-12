@@ -62,7 +62,9 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 
 ## Links and References
 https://modelcontextprotocol.io/docs/getting-started/intro
-https://modelcontextprotocol.io/specification/2025-06-18
+https://modelcontextprotocol.io/specification/2026-07-28
+
+[MCP 2026-07-28 spec and C# SDK 2.x upgrade notes](./docs/MCP-2026-07-28-upgrade.md)
 
 
 ## .NET MCP server

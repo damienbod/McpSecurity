@@ -1,3 +1,4 @@
+using ModelContextProtocol.AspNetCore;
 using Microsoft.Identity.Web;
 using ToolsLibrary.Data;
 using ToolsLibrary.Prompts;
@@ -33,7 +34,11 @@ builder.Services.AddTransient<SalesTools>();
 
 builder.Services
     .AddMcpServer()
-    .WithHttpTransport()
+    .WithHttpTransport(options =>
+    {
+        // 2026-07-28 clients are served statelessly (no Mcp-Session-Id), older initialize clients still get sessions
+        options.SessionMode = HttpServerSessionMode.StatefulForInitializeClients;
+    })
     .WithPrompts<PromptExamples>()
     .WithResources<DocumentationResource>()
     .WithTools<RandomNumberTools>()
