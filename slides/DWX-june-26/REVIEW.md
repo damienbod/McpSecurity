@@ -24,7 +24,7 @@ Review only, the deck is unchanged. Slide numbers refer to `DWX-MCP-2026.pptx` (
 | 41-43 | Server OAuth security | Still valid. Add stateless note: every request is authorized independently (matches the per-request bearer validation already shown). |
 | 44-45 | Confidential OIDC client | Unchanged. If SDK built-in OAuth is shown: `AuthorizationCallbackHandler`, issuer + PKCE checks. |
 | 49-50 | Recap | Add upgrade checklist: stateless default, MRTR instead of server requests, deprecations (`MCP9005`), PKCE/issuer validation, security patches 1.4.2/2.3.1. |
-| 51-52 | Links / references | Add spec 2026-07-28 changelog, C# SDK 2.x docs (MRTR, stateless), SDK release notes. README still links 2025-06-18 spec. |
+| 51-52 | Links / references | Add spec 2026-07-28 changelog, C# SDK 2.x docs (MRTR, stateless), SDK release notes. README spec links now point to 2026-07-28. |
 
 ## Demos: risks and checks (all projects)
 

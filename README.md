@@ -81,9 +81,9 @@ https://learn.microsoft.com/en-us/dotnet/ai/quickstarts/build-mcp-server
 
 [OAuth 2.0 Authorization Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414)
 
-https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization
+https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization
 
-https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
+https://modelcontextprotocol.io/specification/2026-07-28/basic/security_best_practices
 
 https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1299
 
