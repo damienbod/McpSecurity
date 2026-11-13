@@ -7,21 +7,40 @@ namespace ToolsLibrary.Tools;
 
 public static class ElicitationHelper
 {
-    public static async Task<T> InvokeEliciation<T>(McpServer mcpServer, string toolName, Func<T> toolExecution)
+    private const string ApprovalKey = "approval";
+
+    // Multi round-trip request (MRTR, spec 2026-07-28): the first call throws InputRequiredException,
+    // the client asks the user and retries the same tool call with the answer in InputResponses.
+    public static T InvokeEliciation<T>(
+        McpServer mcpServer,
+        RequestContext<CallToolRequestParams> context,
+        string toolName,
+        Func<T> toolExecution)
     {
-        if (mcpServer.ClientCapabilities?.Elicitation == null)
+        var inputResponses = context.Params?.InputResponses;
+        if (inputResponses != null && inputResponses.TryGetValue(ApprovalKey, out var response))
+        {
+            var userAccepted = response.Deserialize(InputResponse.ElicitResultJsonTypeInfo);
+            if (userAccepted?.Action != "accept" || userAccepted.Content?["answer"].ValueKind != System.Text.Json.JsonValueKind.True)
+            {
+                throw new McpException("User declined to proceed");
+            }
+
+            return toolExecution();
+        }
+
+        if (mcpServer.ClientCapabilities?.Elicitation == null || !mcpServer.IsMrtrSupported)
         {
             // for demo purpose, we allow direct execution if the client does not support elicitation
             return toolExecution();
         }
 
-        var userAccepted = await mcpServer.ElicitAsync(GetApprovalParams(toolName));
-        if (userAccepted.Action != "accept" || userAccepted.Content?["answer"].ValueKind != System.Text.Json.JsonValueKind.True)
-        {
-            throw new McpException("User declined to proceed");
-        }
-
-        return toolExecution();
+        throw new InputRequiredException(
+            inputRequests: new Dictionary<string, InputRequest>
+            {
+                [ApprovalKey] = InputRequest.ForElicitation(GetApprovalParams(toolName))
+            },
+            requestState: ApprovalKey);
     }
 
     public static ElicitRequestParams GetApprovalParams(string name) => new()
