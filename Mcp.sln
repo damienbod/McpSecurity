@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{421C59
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientLibrary", "src\ClientLibrary\ClientLibrary.csproj", "{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionCallingDemo", "src\FunctionCallingDemo\FunctionCallingDemo.csproj", "{A688A288-65FF-4E93-9CBC-ED2024B1241E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A688A288-65FF-4E93-9CBC-ED2024B1241E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A688A288-65FF-4E93-9CBC-ED2024B1241E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A688A288-65FF-4E93-9CBC-ED2024B1241E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A688A288-65FF-4E93-9CBC-ED2024B1241E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{B8486945-AED2-467E-9F02-C33C0B611F7B} = {421C59C1-3B8B-4A7F-9636-0BEDD1D56510}
 		{53DEF5AC-574B-8FC2-1FC4-66D099831AC6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BC623ED6-DBE9-4BC2-B417-BC16C74E89AD} = {421C59C1-3B8B-4A7F-9636-0BEDD1D56510}
+		{A688A288-65FF-4E93-9CBC-ED2024B1241E} = {421C59C1-3B8B-4A7F-9636-0BEDD1D56510}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8220C84B-2D85-4EF8-824C-DA43217D01F0}

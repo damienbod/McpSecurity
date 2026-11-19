@@ -1,0 +1,48 @@
+{
+  "profiles": {
+    "1. auto-invoke": {
+      "commandName": "Project",
+      "commandLineArgs": "auto-invoke"
+    },
+    "2. manual-invoke": {
+      "commandName": "Project",
+      "commandLineArgs": "manual-invoke"
+    },
+    "3. tool-mode": {
+      "commandName": "Project",
+      "commandLineArgs": "tool-mode"
+    },
+    "4. parallel": {
+      "commandName": "Project",
+      "commandLineArgs": "parallel"
+    },
+    "5. max-iterations": {
+      "commandName": "Project",
+      "commandLineArgs": "max-iterations"
+    },
+    "6. errors": {
+      "commandName": "Project",
+      "commandLineArgs": "errors"
+    },
+    "7. unknown-calls": {
+      "commandName": "Project",
+      "commandLineArgs": "unknown-calls"
+    },
+    "8. terminate": {
+      "commandName": "Project",
+      "commandLineArgs": "terminate"
+    },
+    "9. function-invoker": {
+      "commandName": "Project",
+      "commandLineArgs": "function-invoker"
+    },
+    "10. approval": {
+      "commandName": "Project",
+      "commandLineArgs": "approval"
+    },
+    "all": {
+      "commandName": "Project",
+      "commandLineArgs": "all"
+    }
+  }
+}
