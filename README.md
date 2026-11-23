@@ -58,6 +58,22 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 
 ![Flow 4](https://github.com/damienbod/McpSecurity/blob/main/flows/mcp-flow-4.drawio.png)
 
+## Function calling demo (Microsoft.Extensions.AI)
+
+`src/FunctionCallingDemo` shows the function calling settings of MEAI, one demo per launch profile:
+`auto-invoke`, `manual-invoke`, `tool-mode`, `parallel`, `max-iterations`, `errors`, `unknown-calls`, `terminate`, `function-invoker`, `approval` (or `all`).
+
+Configure the Foundry model in the user secrets:
+
+```json
+{
+  "OpenAI:Endpoint": "https://<your-foundry-resource>.openai.azure.com/",
+  "OpenAI:ModelId": "<your-model-deployment-name>",
+  "OpenAI:ApiKey": "<your-api-key>"
+}
+```
+
+Run: `dotnet run --project src/FunctionCallingDemo -- parallel`
 
 
 ## Links and References
@@ -184,6 +200,10 @@ https://github.com/Azure-Samples/remote-mcp-webapp-dotnet
 ```
 npx @modelcontextprotocol/inspector
 ```
+
+For the unauthenticated server, run `dotnet run --project src\UnsecureHttpMcpServer --launch-profile http`
+and connect Inspector using **Streamable HTTP** at `http://localhost:3001/mcp`.
+See [the server README](src/UnsecureHttpMcpServer/README.md) for details.
 
 https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMcpClient/Program.cs
 
