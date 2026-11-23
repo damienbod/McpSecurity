@@ -7,6 +7,8 @@ using ToolsLibrary.Tools;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<SalesDataStore>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton(new SalesToolsOptions { RequireSalesScope = false });
 
 builder.Services
        .AddMcpServer()

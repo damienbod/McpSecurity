@@ -201,6 +201,10 @@ https://github.com/Azure-Samples/remote-mcp-webapp-dotnet
 npx @modelcontextprotocol/inspector
 ```
 
+For the unauthenticated server, run `dotnet run --project src\UnsecureHttpMcpServer --launch-profile http`
+and connect Inspector using **Streamable HTTP** at `http://localhost:3001/mcp`.
+See [the server README](src/UnsecureHttpMcpServer/README.md) for details.
+
 https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/ProtectedMcpClient/Program.cs
 
 https://github.com/Azure-Samples/ms-identity-dotnet-desktop-tutorial/blob/master/1-Calling-MSGraph/1-1-AzureAD/Console-Interactive-MultiTarget/Program.cs

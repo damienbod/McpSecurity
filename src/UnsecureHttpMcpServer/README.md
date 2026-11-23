@@ -1,127 +1,48 @@
-# MCP Server
+# Unsecure HTTP MCP server
 
-This README was created using the C# MCP server project template. It demonstrates how you can easily create an MCP server using C# and publish it as a NuGet package.
+This is an unauthenticated MCP server using the Streamable HTTP transport. Run it
+locally from the repository root:
 
-See [aka.ms/nuget/mcp/guide](https://aka.ms/nuget/mcp/guide) for the full guide.
-
-Please note that this template is currently in an early preview stage. If you have feedback, please take a [brief survey](http://aka.ms/dotnet-mcp-template-survey).
-
-## Checklist before publishing to NuGet.org
-
-- Test the MCP server locally using the steps below.
-- Update the package metadata in the .csproj file, in particular the `<PackageId>`.
-- Update `.mcp/server.json` to declare your MCP server's inputs.
-  - See [configuring inputs](https://aka.ms/nuget/mcp/guide/configuring-inputs) for more details.
-- Pack the project using `dotnet pack`.
-
-The `bin/Release` directory will contain the package file (.nupkg), which can be [published to NuGet.org](https://learn.microsoft.com/nuget/nuget-org/publish-a-package).
-
-## Developing locally
-
-To test this MCP server from source code (locally) without using a built MCP server package, you can configure your IDE to run the project directly using `dotnet run`.
-
-```json
-{
-  "servers": {
-    "SampleMcpServer": {
-      "type": "stdio",
-      "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "<PATH TO PROJECT DIRECTORY>"
-      ]
-    }
-  }
-}
+```powershell
+dotnet run --project src\UnsecureHttpMcpServer --launch-profile http
 ```
 
-## Testing the MCP Server
+In another terminal, start the MCP Inspector:
 
-Once configured, you can ask Copilot Chat for a random number, for example, `Give me 3 random numbers`. It should prompt you to use the `get_random_number` tool on the `SampleMcpServer` MCP server and show you the results.
-
-## Publishing to NuGet.org
-
-1. Run `dotnet pack -c Release` to create the NuGet package
-2. Publish to NuGet.org with `dotnet nuget push bin/Release/*.nupkg --api-key <your-api-key> --source https://api.nuget.org/v3/index.json`
-
-## Using the MCP Server from NuGet.org
-
-Once the MCP server package is published to NuGet.org, you can configure it in your preferred IDE. Both VS Code and Visual Studio use the `dnx` command to download and install the MCP server package from NuGet.org.
-
-- **VS Code**: Create a `<WORKSPACE DIRECTORY>/.vscode/mcp.json` file
-- **Visual Studio**: Create a `<SOLUTION DIRECTORY>\.mcp.json` file
-
-For both VS Code and Visual Studio, the configuration file uses the following server definition:
-
-```json
-{
-  "servers": {
-    "SampleMcpServer": {
-      "type": "stdio",
-      "command": "dnx",
-      "args": [
-        "<your package ID here>",
-        "--version",
-        "<your package version here>",
-        "--yes"
-      ]
-    }
-  }
-}
+```powershell
+npx @modelcontextprotocol/inspector
 ```
 
-## More information
+In the Inspector, select **Streamable HTTP** as the transport and connect to
+`http://localhost:3001/mcp`. You can then list tools and invoke
+`get_random_number` or `get_all_customers`, for example.
 
-.NET MCP servers use the [ModelContextProtocol](https://www.nuget.org/packages/ModelContextProtocol) C# SDK. For more information about MCP:
+The server is an HTTP server, not a stdio server: do not configure Inspector to
+launch it as a stdio command.
 
-- [Official Documentation](https://modelcontextprotocol.io/)
-- [Protocol Specification](https://spec.modelcontextprotocol.io/)
-- [GitHub Organization](https://github.com/modelcontextprotocol)
+## Using HTTPS with Inspector on Windows
 
-Refer to the VS Code or Visual Studio documentation for more information on configuring and using MCP servers:
+Start the server with its HTTPS profile:
 
-- [Use MCP servers in VS Code (Preview)](https://code.visualstudio.com/docs/copilot/chat/mcp-servers)
-- [Use MCP servers in Visual Studio (Preview)](https://learn.microsoft.com/visualstudio/ide/mcp-servers)
-
-## Links
-
-https://devblogs.microsoft.com/dotnet/mcp-server-dotnet-nuget-quickstart/
-
-## Configure GitHub Copilot to use your MCP server 
-
-.vscode/mcp.json
-
-```json
-{
-  "servers": {
-    "SampleMcpServer": {
-      "type": "stdio",
-      "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "."
-      ],
-      "env": {
-        "WEATHER_CHOICES": "sunny,humid,freezing,perfect"
-      }
-    }
-  }
-}
+```powershell
+dotnet run --project src\UnsecureHttpMcpServer --launch-profile https
 ```
 
-## Configure Claude Desktop
+Check that the ASP.NET Core development certificate is trusted with
+`dotnet dev-certs https --check --trust`. If it is not trusted, run
+`dotnet dev-certs https --trust` and approve the trust prompt.
 
-Add to your Claude Desktop configuration (%APPDATA%\Claude\claude_desktop_config.json on Windows):
+Inspector runs on Node.js, which may not use the Windows certificate store by
+default. With Node.js 24, start a new Inspector process from PowerShell with:
 
-```json
-{
-  "mcpServers": {
-    "SampleMcpServer": {
-      "command": "dotnet",
-      "args": ["run", "--project", "C:\\path\\to\\MyMcpServer"]
-    }
-  }
-}
+```powershell
+$env:NODE_OPTIONS = "--use-system-ca"
+npx @modelcontextprotocol/inspector
 ```
+
+Select **Streamable HTTP** and connect to `https://localhost:7133/mcp`. Restart
+Inspector after changing `NODE_OPTIONS`; the setting only affects processes
+started from that terminal.
+
+This server has no authentication, including for the sales tools, and is
+intended for local demos only. Do not expose it to untrusted networks.

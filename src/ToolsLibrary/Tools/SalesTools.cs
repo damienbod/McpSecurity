@@ -8,8 +8,16 @@ using ToolsLibrary.Models;
 
 namespace ToolsLibrary.Tools;
 
+public sealed class SalesToolsOptions
+{
+    public bool RequireSalesScope { get; set; } = true;
+}
+
 [McpServerToolType]
-public class SalesTools(SalesDataStore store, IHttpContextAccessor httpContextAccessor)
+public class SalesTools(
+    SalesDataStore store,
+    IHttpContextAccessor httpContextAccessor,
+    SalesToolsOptions? options = null)
 {
     private static readonly JsonSerializerOptions _json = new()
     {
@@ -82,6 +90,11 @@ public class SalesTools(SalesDataStore store, IHttpContextAccessor httpContextAc
 
     private void EnsureSalesScope()
     {
+        if (options is { RequireSalesScope: false })
+        {
+            return;
+        }
+
         var user = httpContextAccessor.HttpContext?.User;
         if (!HasScope(user, "mcp:sales"))
         {
