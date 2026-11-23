@@ -15,6 +15,7 @@ if (string.IsNullOrWhiteSpace(config["OpenAI:Endpoint"]) ||
     string.IsNullOrWhiteSpace(config["OpenAI:ApiKey"]))
 {
     ConsoleUi.Error("Please set OpenAI:Endpoint, OpenAI:ModelId and OpenAI:ApiKey in secrets.json (dotnet user-secrets).");
+    PauseBeforeExit();
     return;
 }
 
@@ -53,6 +54,15 @@ else
 }
 
 Console.WriteLine();
+PauseBeforeExit();
 
+static void PauseBeforeExit()
+{
+    if (Console.IsInputRedirected)
+    {
+        return;
+    }
 
-Console.ReadKey();
+    Console.WriteLine("Press any key to exit...");
+    Console.ReadKey(intercept: true);
+}
