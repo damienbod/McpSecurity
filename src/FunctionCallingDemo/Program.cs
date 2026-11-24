@@ -19,7 +19,8 @@ if (string.IsNullOrWhiteSpace(config["OpenAI:Endpoint"]) ||
     return;
 }
 
-var demos = new Demos(ChatClientHelper.GetChatClient(config));
+var baseClient = ChatClientHelper.GetChatClient(config);
+var demos = new Demos(baseClient);
 
 var allDemos = new Dictionary<string, Func<Task>>
 {
@@ -33,6 +34,7 @@ var allDemos = new Dictionary<string, Func<Task>>
     ["terminate"] = demos.TerminateAsync,
     ["function-invoker"] = demos.FunctionInvokerAsync,
     ["approval"] = demos.ApprovalAsync,
+    ["progressive-discovery"] = () => ProgressiveDiscoveryDemo.RunAsync(baseClient),
 };
 
 var demo = args.FirstOrDefault() ?? "all";
