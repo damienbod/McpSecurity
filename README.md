@@ -16,7 +16,7 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 - [Implement a secure MCP server using OAuth DPoP and Duende identity provider](https://damienbod.com/2025/11/03/implement-a-secure-mcp-server-using-oauth-dpop-and-duende-identity-provider/)
 
 ## Presentation
-- [AI Community Day Basel - How to securely implement MCP with OAuth in .NET](./slides/AI-community-day-Basel-sept-25/MCP-Security-2025.pdf)
+- [AI Community Day Zurich - How to securely implement MCP with OAuth in .NET](./slides/AI-community-day-zurich-sept-25/MCP-Security-2025.pdf)
  
 ## Definitions
 
@@ -61,7 +61,7 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 ## Function calling demo (Microsoft.Extensions.AI)
 
 `src/FunctionCallingDemo` shows the function calling settings of MEAI, one demo per launch profile:
-`auto-invoke`, `manual-invoke`, `tool-mode`, `parallel`, `max-iterations`, `errors`, `unknown-calls`, `terminate`, `function-invoker`, `approval` (or `all`).
+`auto-invoke`, `manual-invoke`, `tool-mode`, `parallel`, `max-iterations`, `errors`, `unknown-calls`, `terminate`, `function-invoker`, `approval`, `progressive-discovery` (or `all`).
 
 Configure the Foundry model in the user secrets:
 
@@ -74,6 +74,13 @@ Configure the Foundry model in the user secrets:
 ```
 
 Run: `dotnet run --project src/FunctionCallingDemo -- parallel`
+
+Run `dotnet run --project src/FunctionCallingDemo -- progressive-discovery` to compare advertising
+102 tools against starting with a keyword-based `search_tools` function and exposing only discovered
+tools. The catalog contains 100 simulated administrative functions alongside the weather and time
+tools. The comparison sums provider-reported input and output tokens across all requests, including
+discovery and tool results, and reports when usage is unavailable. Savings and task completion depend
+on the model and its tool choices; discovery adds round trips and does not guarantee a reduction.
 
 ## Sales Assistant demo
 

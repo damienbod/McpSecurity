@@ -40,6 +40,10 @@
       "commandName": "Project",
       "commandLineArgs": "approval"
     },
+    "11. progressive-discovery": {
+      "commandName": "Project",
+      "commandLineArgs": "progressive-discovery"
+    },
     "all": {
       "commandName": "Project",
       "commandLineArgs": "all"
