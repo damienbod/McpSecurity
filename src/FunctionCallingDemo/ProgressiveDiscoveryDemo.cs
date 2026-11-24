@@ -12,6 +12,10 @@ public static class ProgressiveDiscoveryDemo
 {
     private const int MaxRequests = 12;
     private const string Prompt = "Use the tools to tell me the current time and the weather in Basel.";
+    private static readonly HashSet<string> StopWords = new(StringComparer.Ordinal)
+    {
+        "the", "and", "for", "use", "get", "gets", "this", "that", "with", "more", "tool", "tools", "function"
+    };
 
     public static async Task RunAsync(IChatClient client)
     {
@@ -160,7 +164,9 @@ public static class ProgressiveDiscoveryDemo
                 if (function is null)
                 {
                     ConsoleUi.Error($"Model requested unavailable function '{call.Name}'; it was not executed.");
-                    result = $"Function '{call.Name}' is not available. Search for it first.";
+                    result = progressive
+                        ? $"Function '{call.Name}' is not available. Search for it first."
+                        : $"Function '{call.Name}' is not available.";
                 }
                 else
                 {
@@ -191,7 +197,7 @@ public static class ProgressiveDiscoveryDemo
     {
         var terms = Regex.Matches(query.ToLowerInvariant(), "[a-z0-9]+")
             .Select(match => match.Value)
-            .Where(term => term.Length > 2)
+            .Where(term => term.Length > 2 && !StopWords.Contains(term))
             .Distinct()
             .ToArray();
 
