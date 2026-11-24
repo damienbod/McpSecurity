@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using Microsoft.Extensions.AI;
+using System.Diagnostics;
 
 namespace FunctionCallingDemo;
 
@@ -38,7 +38,7 @@ public class Demos(IChatClient baseClient)
         var client = WithFunctionInvocation();
         var options = new ChatOptions { Tools = [Tools.GetWeather, Tools.GetCurrentTime] };
 
-        await AskAsync(client, "What time is it and what is the weather in Zurich?", options);
+        await AskAsync(client, "What time is it and what is the weather in Basel?", options);
     }
 
     // ------------------------------------------------------------------
@@ -51,7 +51,7 @@ public class Demos(IChatClient baseClient)
 
         AIFunction[] tools = [Tools.GetWeather, Tools.GetCurrentTime];
         var options = new ChatOptions { Tools = [.. tools] };
-        var prompt = "What time is it and what is the weather in Zurich?";
+        var prompt = "What time is it and what is the weather in Köln?";
 
         ConsoleUi.User(prompt);
         List<ChatMessage> history = [new(ChatRole.User, prompt)];
@@ -115,7 +115,7 @@ public class Demos(IChatClient baseClient)
         ConsoleUi.Title("4. Parallel function calls",
             "FunctionInvokingChatClient.AllowConcurrentInvocation and ChatOptions.AllowMultipleToolCalls. Each get_weather call takes 1s.");
 
-        var prompt = "What is the weather in Zurich, Bern and Geneva?";
+        var prompt = "What is the weather in Basel, Bern and Geneva?";
 
         ConsoleUi.Step("AllowConcurrentInvocation = false (default) - multiple calls in one response run one after another");
         await AskAsync(WithFunctionInvocation(), prompt,
@@ -245,7 +245,7 @@ public class Demos(IChatClient baseClient)
         });
 
         var options = new ChatOptions { Tools = [Tools.GetWeather] };
-        await AskAsync(client, "What is the weather in Zurich and in Atlantis?", options);
+        await AskAsync(client, "What is the weather in Basel and in Atlantis?", options);
     }
 
     // ------------------------------------------------------------------

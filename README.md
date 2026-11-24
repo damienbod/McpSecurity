@@ -82,6 +82,55 @@ tools. The comparison sums provider-reported input and output tokens across all 
 discovery and tool results, and reports when usage is unavailable. Savings and task completion depend
 on the model and its tool choices; discovery adds round trips and does not guarantee a reduction.
 
+## Sales Assistant demo
+
+The Sales Assistant uses the sales MCP tools to explore the seeded customers and
+orders. The order data is anchored in May 2025, not a live sales system. Values
+are shown in CHF.
+
+| Tool | Purpose |
+| --- | --- |
+| `get_all_customers`, `get_all_orders` | List the seeded customers or orders. |
+| `get_customer_orders`, `get_delayed_orders` | List a customer's orders or orders marked delayed. |
+| `search_customers` | Filter by partial name, industry, account manager, and/or tier. |
+| `search_orders` | Filter by customer ID, status, inclusive order-date range, and/or CHF value range. |
+| `get_customer_overview` | Summarize order counts, total value and delivery delays for a customer. |
+| `get_customer_follow_up_notes` | List a customer's simulated notes. |
+| `update_order_status` | Change an order's status and actual delivery date. |
+| `add_customer_follow_up_note` | Record a simulated note; no message is sent. |
+
+Try asking:
+
+- “Find tier A retail customers and summarize their delayed orders.”
+- “Compare Fabrikam GmbH and Helvetic Pharma by total order value and average delivery delay.”
+- “Find orders worth at least CHF 30,000 ordered in 2025.”
+- “Show me the follow-up notes for Fabrikam GmbH.”
+- “Update order ORD-011 to delayed.”
+- “Add a follow-up note for Fabrikam GmbH: call about delivery dates.”
+
+Customer-overview averages include only delivered orders marked `Delayed`;
+undelivered delayed orders are counted separately. `OnTime` requires an actual
+delivery date no later than the promised date; `Delayed` accepts a later actual
+date or no date for an undelivered order; `InProgress` requires no actual date.
+Actual delivery dates cannot precede order dates.
+
+The web assistant asks for explicit approval of each proposed write. This
+confirmation is enforced by that client, not the server: other MCP clients
+must implement their own approval. The secure server uses the existing
+`mcp:sales` scope for both reads and writes. The unauthenticated server is for
+local demos only. Updates and notes are shared by users of the same server
+process and disappear when it restarts; they are not persisted to a CRM.
+To view them, select **Browse follow-up notes** below the chat and choose a
+customer. Notes are also shown after an approved note action when the result
+can be refreshed. If an action's outcome is uncertain, check the notes before
+retrying to avoid duplicates; the web application's logs contain the error.
+
+If the notes tools are missing, check that `SalesMcpServerUrl` points to the
+updated `HttpMcpServer`, not an older running instance or deployment. From this
+checkout, start it with `dotnet run --project src\HttpMcpServer --launch-profile https`
+after stopping any server already using its configured port. Restarting the
+server clears its in-memory notes and order changes.
+
 
 ## Links and References
 https://modelcontextprotocol.io/docs/getting-started/intro

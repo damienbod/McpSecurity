@@ -22,12 +22,22 @@ public record SalesOrderView(
 
 public record SalesChatMessage(string Role, string Content);
 
-public record McpToolCall(string ToolName, string? Arguments, bool Success);
+public record McpToolCall(string ToolName, string? Arguments, bool? Success);
+
+public record SalesApproval(string Id, string ToolName, string Arguments);
+
+public record SalesNoteView(string Id, string CustomerId, string Text, DateTime CreatedAtUtc);
+
+public record SalesNotesView(
+    List<SalesCustomerView> Customers,
+    string? SelectedCustomerId,
+    List<SalesNoteView> Notes);
 
 public record SalesResponse(
     string? FinalAnswer,
     List<SalesChatMessage> ChatHistory,
     List<SalesCustomerView> Customers,
     List<SalesOrderView> Orders,
-    List<McpToolCall> ToolCalls
+    List<McpToolCall> ToolCalls,
+    List<SalesApproval> PendingApprovals
 );
