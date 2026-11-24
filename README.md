@@ -63,6 +63,8 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 `src/FunctionCallingDemo` shows the function calling settings of MEAI, one demo per launch profile:
 `auto-invoke`, `manual-invoke`, `tool-mode`, `parallel`, `max-iterations`, `errors`, `unknown-calls`, `terminate`, `function-invoker`, `approval`, `progressive-discovery` (or `all`).
 
+The `approval` demo requests one tool call at a time so that `get_current_time` can run without approval while `delete_file` requires it. MEAI requires approval for every tool call in a response if any call in that response requires approval; the model provider must honor the single-call request to avoid this.
+
 Configure the Foundry model in the user secrets:
 
 ```json

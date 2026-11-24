@@ -254,10 +254,15 @@ public class Demos(IChatClient baseClient)
     public async Task ApprovalAsync()
     {
         ConsoleUi.Title("10. Human in the loop (ApprovalRequiredAIFunction)",
-            "Functions wrapped in ApprovalRequiredAIFunction are not executed until the user approves them.");
+            "Only delete_file requires approval; the model is asked to call one tool at a time.");
 
         var client = WithFunctionInvocation();
-        var options = new ChatOptions { Tools = [new ApprovalRequiredAIFunction(Tools.DeleteFile), Tools.GetCurrentTime] };
+        var options = new ChatOptions
+        {
+            Tools = [new ApprovalRequiredAIFunction(Tools.DeleteFile), Tools.GetCurrentTime],
+            // MEAI requires approval for every call in a response if any call requires approval.
+            AllowMultipleToolCalls = false
+        };
         var prompt = "What time is it? Then delete the file /tmp/report.txt.";
 
         ConsoleUi.User(prompt);
