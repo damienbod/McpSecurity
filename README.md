@@ -17,6 +17,10 @@ Model context protocol (MCP) OAuth, security, authorization, authentication flow
 
 ## Presentation
 - [AI Community Day Zurich - How to securely implement MCP with OAuth in .NET](./slides/AI-community-day-zurich-sept-25/MCP-Security-2025.pdf)
+- [DDC MCP 2026](./slides/DDC-Nov26/DDC-MCP-2026.pdf)
+- [DWX MCP 2026](./slides/DWX-june-26/DWX-MCP-2026.pdf)
+
+Do you want to know more about Agentic Design Patterns - go here: [cedricmendelin/Agentic-Design-Patterns-MAF](https://github.com/cedricmendelin/Agentic-Design-Patterns-MAF)
  
 ## Definitions
 
